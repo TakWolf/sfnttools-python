@@ -11,6 +11,10 @@ SfntTools is a library for manipulating the [SFNT Format](https://en.wikipedia.o
 pip install sfnttools
 ```
 
+## Dependencies
+
+- [Brotli](https://github.com/google/brotli)
+
 ## References
 
 - [OpenType Specification](https://learn.microsoft.com/en-us/typography/opentype/spec/)
