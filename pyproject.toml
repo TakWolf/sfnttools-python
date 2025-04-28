@@ -36,3 +36,10 @@ pythonpath = "src"
 addopts = [
     "--import-mode=importlib",
 ]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/assets/",
+    "/examples/",
+    "/tests/",
+]
