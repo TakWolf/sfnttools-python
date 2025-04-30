@@ -3,7 +3,7 @@ from collections.abc import Iterator
 
 from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
-from sfnttools.table import SfntTable, SfntTableContainer
+from sfnttools.table import SfntTableContainer, SfntTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.checksum import calculate_checksum, calculate_checksum_adjustment
 

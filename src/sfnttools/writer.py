@@ -1,4 +1,4 @@
-from sfnttools.table import SfntTable, SfntTableContainer
+from sfnttools.table import SfntTableContainer, SfntTable
 
 
 class SfntWriter(SfntTableContainer):

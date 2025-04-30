@@ -3,7 +3,7 @@ from io import BytesIO
 from typing import Final
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTable, SfntTableContainer
+from sfnttools.table import SfntTableContainer, SfntTable
 from sfnttools.utils.stream import Stream
 
 _MAGIC_NUMBER = 0x5F0F3CF5
