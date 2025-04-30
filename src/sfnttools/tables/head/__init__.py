@@ -21,8 +21,8 @@ class FontDirectionHint(IntEnum):
 
 
 class IndexToLocFormat(IntEnum):
-    SHORT_OFFSETS = 0
-    LONG_OFFSETS = 1
+    SHORT = 0
+    LONG = 1
 
 
 class GlyphDataFormat(IntEnum):
@@ -110,7 +110,7 @@ class HeadTable(SfntTable):
             mac_style: int = 0,
             lowest_rec_ppem: int = 0,
             font_direction_hint: FontDirectionHint = FontDirectionHint.LEFT_TO_RIGHT_CONTAINS_NEUTRALS,
-            index_to_loc_format: IndexToLocFormat = IndexToLocFormat.SHORT_OFFSETS,
+            index_to_loc_format: IndexToLocFormat = IndexToLocFormat.SHORT,
             glyph_data_format: GlyphDataFormat = GlyphDataFormat.CURRENT,
     ):
         self.major_version = major_version
