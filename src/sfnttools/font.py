@@ -6,7 +6,7 @@ from typing import Any, BinaryIO
 from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
 from sfnttools.table import SfntTable
-from sfnttools.tables import TABLE_TYPE_REGISTRY
+from sfnttools.tables.factory import TABLE_TYPE_REGISTRY
 from sfnttools.tag import SfntVersion, SfntFileTag
 from sfnttools.utils.stream import Stream
 from sfnttools.woff.reader import WoffReader

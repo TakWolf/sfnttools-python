@@ -100,7 +100,7 @@ class SfntReader(SfntTableContainer):
             if self.verify_checksum and expected_checksum is not None and checksum != expected_checksum:
                 raise SfntError(f'table {repr(tag)} bad checksum')
 
-            from sfnttools.tables import TABLE_TYPE_REGISTRY, DEFAULT_TABLE_TYPE
+            from sfnttools.tables.factory import TABLE_TYPE_REGISTRY, DEFAULT_TABLE_TYPE
             table_type = TABLE_TYPE_REGISTRY.get(tag, DEFAULT_TABLE_TYPE)
             table = table_type.parse(data, self)
             if tag == 'head':
