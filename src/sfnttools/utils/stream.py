@@ -70,8 +70,10 @@ class Stream:
     def read_offset32(self) -> int:
         return self.read_uint32()
 
-    def read_version_16dot16(self) -> float:
-        return self.read_uint32() / (2 ** 16)
+    def read_version_16dot16(self) -> tuple[int, int]:
+        major_version = self.read_uint16()
+        minor_version = self.read_uint16() >> 12
+        return major_version, minor_version
 
     def read_255uint16(self) -> int:
         code = self.read_uint8()
@@ -161,8 +163,13 @@ class Stream:
     def write_offset32(self, value: int) -> int:
         return self.write_uint32(value)
 
-    def write_version_16dot16(self, value: float) -> int:
-        return self.write_uint32(round(value * (2 ** 16)))
+    def write_version_16dot16(self, value: tuple[int, int]) -> int:
+        major_version, minor_version = value
+        if not 0 <= minor_version <= 9:
+            raise ValueError('minor version requires 0 <= integer <= 9')
+
+        minor_version <<= 12
+        return self.write_uint16(major_version) + self.write_uint16(minor_version)
 
     def write_255uint16(self, value: int) -> int:
         if not 0 <= value <= 0xFFFF:

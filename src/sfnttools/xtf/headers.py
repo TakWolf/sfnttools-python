@@ -118,7 +118,7 @@ class TtcHeader:
         minor_version = stream.read_uint16()
         num_fonts = stream.read_uint32()
         table_directory_offsets = [stream.read_offset32() for _ in range(num_fonts)]
-        if major_version == 2:
+        if (major_version, minor_version) == (2, 0):
             stream.read_tag()
             dsig_length = stream.read_uint32()
             dsig_offset = stream.read_uint32()
@@ -178,7 +178,7 @@ class TtcHeader:
         stream.write_uint32(self.num_fonts)
         for table_directory_offset in self.table_directory_offsets:
             stream.write_offset32(table_directory_offset)
-        if self.major_version == 2:
+        if (self.major_version, self.minor_version) == (2, 0):
             stream.write_tag('DSIG' if self.dsig_length > 0 else '\x00\x00\x00\x00')
             stream.write_uint32(self.dsig_length)
             stream.write_uint32(self.dsig_offset)
