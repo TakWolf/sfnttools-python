@@ -3,14 +3,14 @@ from collections.abc import Iterator
 
 from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
-from sfnttools.table import SfntTable, SfntTableReader
+from sfnttools.table import SfntTable, SfntTableContainer
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.checksum import calculate_checksum, calculate_checksum_adjustment
 
 
 class _HeadWrapperTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, reader: SfntTableReader) -> '_HeadWrapperTable':
+    def parse(data: bytes, container: SfntTableContainer) -> '_HeadWrapperTable':
         raise NotImplementedError()
 
     table: SfntTable
@@ -27,11 +27,11 @@ class _HeadWrapperTable(SfntTable):
     def copy(self) -> '_HeadWrapperTable':
         return _HeadWrapperTable(self.table.copy(), self.checksum_adjustment)
 
-    def dump(self) -> bytes:
+    def dump(self, container: SfntTableContainer) -> bytes:
         raise NotImplementedError()
 
 
-class SfntReader(SfntTableReader):
+class SfntReader(SfntTableContainer):
     share_tables: bool
     verify_checksum: bool
     tables_cache: dict[str, tuple[SfntTable, int]]
@@ -77,7 +77,7 @@ class SfntReader(SfntTableReader):
     def read_woff_payload(self) -> WoffPayload | None:
         raise NotImplementedError()
 
-    def get_or_parse_table(self, tag: str) -> SfntTable:
+    def get_table(self, tag: str) -> SfntTable:
         table, checksum = self.tables_cache.get(tag, (None, None))
 
         if table is None and self.is_font_collection():
@@ -121,7 +121,7 @@ class SfntReader(SfntTableReader):
         for tag in self.get_table_tags():
             if tag in tables:
                 raise SfntError(f'table {repr(tag)} duplicate')
-            table = self.get_or_parse_table(tag)
+            table = self.get_table(tag)
             tables[tag] = table
 
         if self.verify_checksum and not self.is_font_collection() and 'head' in self.tables_cache:

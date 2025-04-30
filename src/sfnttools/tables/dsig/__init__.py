@@ -3,7 +3,7 @@ from io import BytesIO
 from typing import Protocol, runtime_checkable, Final
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableReader, SfntTable
+from sfnttools.table import SfntTable, SfntTableContainer
 from sfnttools.tables.dsig.headers import SignatureRecord
 from sfnttools.utils.stream import Stream
 
@@ -72,7 +72,7 @@ SIGNATURE_BLOCK_TYPE_REGISTRY: Final = {
 
 class DsigTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, reader: SfntTableReader) -> 'DsigTable':
+    def parse(data: bytes, container: SfntTableContainer) -> 'DsigTable':
         stream = Stream(data)
 
         version = stream.read_uint32()
@@ -118,7 +118,7 @@ class DsigTable(SfntTable):
             [signature_block.copy() for signature_block in self.signature_blocks],
         )
 
-    def dump(self) -> bytes:
+    def dump(self, container: SfntTableContainer) -> bytes:
         buffer = BytesIO()
         stream = Stream(buffer)
 

@@ -3,7 +3,7 @@ from io import BytesIO
 from typing import Final
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableReader, SfntTable
+from sfnttools.table import SfntTable, SfntTableContainer
 from sfnttools.utils.stream import Stream
 
 _MAGIC_NUMBER = 0x5F0F3CF5
@@ -31,7 +31,7 @@ class GlyphDataFormat(IntEnum):
 
 class HeadTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, reader: SfntTableReader) -> 'HeadTable':
+    def parse(data: bytes, container: SfntTableContainer) -> 'HeadTable':
         stream = Stream(data)
 
         major_version = stream.read_uint16()
@@ -147,7 +147,7 @@ class HeadTable(SfntTable):
             self.glyph_data_format,
         )
 
-    def dump(self) -> bytes:
+    def dump(self, container: SfntTableContainer) -> bytes:
         buffer = BytesIO()
         stream = Stream(buffer)
 

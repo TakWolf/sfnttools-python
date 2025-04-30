@@ -66,7 +66,7 @@ class Woff2Reader(SfntReader):
         table_records = []
         offset = TableDirectory.calculate_bytes_size(self.header.num_tables)
         for table_directory_entry in self.header.iter_table_directory_entries(self.font_entry):
-            self.get_or_parse_table(table_directory_entry.tag)
+            self.get_table(table_directory_entry.tag)
             checksum = self.tables_cache[table_directory_entry.tag][1]
             table_records.append(TableRecord(
                 table_directory_entry.tag,

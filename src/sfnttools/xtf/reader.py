@@ -2,7 +2,7 @@ from typing import Iterator
 
 from sfnttools.payload import TtcPayload, WoffPayload
 from sfnttools.reader import SfntReader, SfntCollectionReader
-from sfnttools.table import SfntTableReader, SfntTable
+from sfnttools.table import SfntTable, SfntTableContainer
 from sfnttools.tables import DsigTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.stream import Stream
@@ -123,7 +123,7 @@ class XtfCollectionReader(SfntCollectionReader):
 
     def read_ttc_payload(self) -> TtcPayload:
         data = self.header.read_dsig_table_data(self.stream)
-        dsig_table = None if data is None else DsigTable.parse(data, SfntTableReader())
+        dsig_table = None if data is None else DsigTable.parse(data, SfntTableContainer())
         return TtcPayload(
             self.header.major_version,
             self.header.minor_version,
