@@ -253,6 +253,20 @@ def test_offset32():
     assert stream.tell() == size
 
 
+def test_version_16dot16():
+    values = [random.randint(0, 0xFF_FF_FF_FF) / (2 ** 16) for _ in range(20)]
+
+    stream = Stream()
+    size = 0
+    for value in values:
+        size += stream.write_version_16dot16(value)
+    assert stream.tell() == size
+    stream.seek(0)
+    for value in values:
+        assert stream.read_version_16dot16() == value
+    assert stream.tell() == size
+
+
 def test_255uint16():
     stream = Stream()
     assert stream.write_255uint16(252) == 1

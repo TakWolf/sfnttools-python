@@ -1,4 +1,4 @@
-from sfnttools.tables import DsigTable
+from sfnttools.tables.dsig import DsigTable
 
 
 class TtcPayload:

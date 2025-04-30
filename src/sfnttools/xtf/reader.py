@@ -3,7 +3,7 @@ from typing import Iterator
 from sfnttools.payload import TtcPayload, WoffPayload
 from sfnttools.reader import SfntReader, SfntCollectionReader
 from sfnttools.table import SfntTable
-from sfnttools.tables import DsigTable
+from sfnttools.tables.dsig import DsigTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.stream import Stream
 from sfnttools.xtf.headers import TableRecord, TableDirectory, TtcHeader
