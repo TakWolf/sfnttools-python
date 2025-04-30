@@ -72,7 +72,7 @@ SIGNATURE_BLOCK_TYPE_REGISTRY: Final = {
 
 class DsigTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, container: SfntTableContainer) -> 'DsigTable':
+    def parse(data: bytes, container: SfntTableContainer | None = None) -> 'DsigTable':
         stream = Stream(data)
 
         version = stream.read_uint32()
