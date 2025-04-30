@@ -7,6 +7,46 @@ from sfnttools.utils.stream import Stream
 
 class MaxpTable(SfntTable):
     @staticmethod
+    def create_for_cff(num_glyphs: int = 0) -> 'MaxpTable':
+        return MaxpTable(0, 5, num_glyphs)
+
+    @staticmethod
+    def create_for_truetype(
+            num_glyphs: int = 0,
+            max_points: int = 0,
+            max_contours: int = 0,
+            max_composite_points: int = 0,
+            max_composite_contours: int = 0,
+            max_zones: int = 0,
+            max_twilight_points: int = 0,
+            max_storage: int = 0,
+            max_function_defs: int = 0,
+            max_instruction_defs: int = 0,
+            max_stack_elements: int = 0,
+            max_size_of_instructions: int = 0,
+            max_component_elements: int = 0,
+            max_component_depth: int = 0,
+    ) -> 'MaxpTable':
+        return MaxpTable(
+            1,
+            0,
+            num_glyphs,
+            max_points,
+            max_contours,
+            max_composite_points,
+            max_composite_contours,
+            max_zones,
+            max_twilight_points,
+            max_storage,
+            max_function_defs,
+            max_instruction_defs,
+            max_stack_elements,
+            max_size_of_instructions,
+            max_component_elements,
+            max_component_depth,
+        )
+
+    @staticmethod
     def parse(data: bytes, container: SfntTableContainer) -> 'MaxpTable':
         stream = Stream(data)
 
@@ -14,7 +54,7 @@ class MaxpTable(SfntTable):
         num_glyphs = stream.read_uint16()
 
         if (major_version, minor_version) == (0, 5):
-            return MaxpTable(major_version, minor_version, num_glyphs)
+            return MaxpTable.create_for_cff(num_glyphs)
         elif (major_version, minor_version) == (1, 0):
             max_points = stream.read_uint16()
             max_contours = stream.read_uint16()
@@ -29,9 +69,7 @@ class MaxpTable(SfntTable):
             max_size_of_instructions = stream.read_uint16()
             max_component_elements = stream.read_uint16()
             max_component_depth = stream.read_uint16()
-            return MaxpTable(
-                major_version,
-                minor_version,
+            return MaxpTable.create_for_truetype(
                 num_glyphs,
                 max_points,
                 max_contours,
