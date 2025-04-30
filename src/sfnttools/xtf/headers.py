@@ -1,5 +1,6 @@
 import math
 
+from sfnttools.error import SfntError
 from sfnttools.tag import SfntVersion, SfntFileTag
 from sfnttools.utils.stream import Stream
 
@@ -49,6 +50,18 @@ class TableRecord:
 
 class TableDirectory:
     @staticmethod
+    def calculate_bytes_size(num_tables: int) -> int:
+        return 4 + 2 + 2 + 2 + 2 + (4 + 4 + 4 + 4) * num_tables
+
+    @staticmethod
+    def create(sfnt_version: SfntVersion, table_records: list[TableRecord]) -> 'TableDirectory':
+        num_tables = len(table_records)
+        entry_selector = math.floor(math.log2(num_tables))
+        search_range = 2 ** entry_selector * 16
+        range_shift = num_tables * 16 - search_range
+        return TableDirectory(sfnt_version, search_range, entry_selector, range_shift, table_records)
+
+    @staticmethod
     def parse(stream: Stream) -> 'TableDirectory':
         sfnt_version = SfntVersion(stream.read_tag())
         num_tables = stream.read_uint16()
@@ -63,18 +76,6 @@ class TableDirectory:
             range_shift,
             table_records,
         )
-
-    @staticmethod
-    def create(sfnt_version: SfntVersion, table_records: list[TableRecord]) -> 'TableDirectory':
-        num_tables = len(table_records)
-        entry_selector = math.floor(math.log2(num_tables))
-        search_range = 2 ** entry_selector * 16
-        range_shift = num_tables * 16 - search_range
-        return TableDirectory(sfnt_version, search_range, entry_selector, range_shift, table_records)
-
-    @staticmethod
-    def calculate_bytes_size(num_tables: int) -> int:
-        return 4 + 2 + 2 + 2 + 2 + (4 + 4 + 4 + 4) * num_tables
 
     sfnt_version: SfntVersion
     search_range: int
@@ -118,13 +119,17 @@ class TtcHeader:
         minor_version = stream.read_uint16()
         num_fonts = stream.read_uint32()
         table_directory_offsets = [stream.read_offset32() for _ in range(num_fonts)]
-        if (major_version, minor_version) == (2, 0):
+
+        if (major_version, minor_version) == (1, 0):
+            dsig_length = 0
+            dsig_offset = 0
+        elif (major_version, minor_version) == (2, 0):
             stream.read_tag()
             dsig_length = stream.read_uint32()
             dsig_offset = stream.read_uint32()
         else:
-            dsig_length = 0
-            dsig_offset = 0
+            raise SfntError(f'ttc header unsupported versions')
+
         return TtcHeader(
             major_version,
             minor_version,
@@ -178,7 +183,12 @@ class TtcHeader:
         stream.write_uint32(self.num_fonts)
         for table_directory_offset in self.table_directory_offsets:
             stream.write_offset32(table_directory_offset)
-        if (self.major_version, self.minor_version) == (2, 0):
+
+        if (self.major_version, self.minor_version) == (1, 0):
+            pass
+        elif (self.major_version, self.minor_version) == (2, 0):
             stream.write_tag('DSIG' if self.dsig_length > 0 else '\x00\x00\x00\x00')
             stream.write_uint32(self.dsig_length)
             stream.write_uint32(self.dsig_offset)
+        else:
+            raise SfntError(f'ttc header unsupported versions')
