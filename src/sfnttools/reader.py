@@ -8,29 +8,6 @@ from sfnttools.tag import SfntVersion
 from sfnttools.utils.checksum import calculate_checksum, calculate_checksum_adjustment
 
 
-class _HeadWrapperTable(SfntTable):
-    @staticmethod
-    def parse(data: bytes, container: SfntTableContainer) -> '_HeadWrapperTable':
-        raise NotImplementedError()
-
-    table: SfntTable
-    checksum_adjustment: int
-
-    def __init__(
-            self,
-            table: SfntTable,
-            checksum_adjustment: int,
-    ):
-        self.table = table
-        self.checksum_adjustment = checksum_adjustment
-
-    def copy(self) -> '_HeadWrapperTable':
-        return _HeadWrapperTable(self.table.copy(), self.checksum_adjustment)
-
-    def dump(self, container: SfntTableContainer) -> bytes:
-        raise NotImplementedError()
-
-
 class SfntReader(SfntTableContainer):
     share_tables: bool
     verify_checksum: bool
@@ -103,16 +80,9 @@ class SfntReader(SfntTableContainer):
             from sfnttools.tables.factory import TABLE_TYPE_REGISTRY, DEFAULT_TABLE_TYPE
             table_type = TABLE_TYPE_REGISTRY.get(tag, DEFAULT_TABLE_TYPE)
             table = table_type.parse(data, self)
-            if tag == 'head':
-                checksum_adjustment = int.from_bytes(data[8:12], 'big', signed=False)
-                table = _HeadWrapperTable(table, checksum_adjustment)
-
             self.tables_cache[tag] = table, checksum
             if self.is_font_collection():
                 self.set_table_and_checksum_to_collection_cache(tag, table, checksum)
-
-        if tag == 'head':
-            table = table.table
 
         return table
 

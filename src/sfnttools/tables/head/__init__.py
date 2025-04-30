@@ -37,7 +37,7 @@ class HeadTable(SfntTable):
         major_version = stream.read_uint16()
         minor_version = stream.read_uint16()
         font_revision = stream.read_fixed()
-        stream.read_uint32()
+        checksum_adjustment = stream.read_uint32()
         magic_number = stream.read_uint32()
         if magic_number != _MAGIC_NUMBER:
             raise SfntError('bad magic number')
@@ -59,6 +59,7 @@ class HeadTable(SfntTable):
             major_version,
             minor_version,
             font_revision,
+            checksum_adjustment,
             flags,
             units_per_em,
             created_time,
@@ -77,6 +78,7 @@ class HeadTable(SfntTable):
     major_version: int
     minor_version: int
     font_revision: float
+    checksum_adjustment: int
     flags: int
     units_per_em: int
     created_time: int
@@ -96,6 +98,7 @@ class HeadTable(SfntTable):
             major_version: int = 1,
             minor_version: int = 0,
             font_revision: float = 0,
+            checksum_adjustment: int = 0,
             flags: int = 0,
             units_per_em: int = UNITS_PER_EM_MIN_VALUE,
             created_time: int = 0,
@@ -113,6 +116,7 @@ class HeadTable(SfntTable):
         self.major_version = major_version
         self.minor_version = minor_version
         self.font_revision = font_revision
+        self.checksum_adjustment = checksum_adjustment
         self.flags = flags
         self.units_per_em = units_per_em
         self.created_time = created_time
@@ -132,6 +136,7 @@ class HeadTable(SfntTable):
             self.major_version,
             self.minor_version,
             self.font_revision,
+            self.checksum_adjustment,
             self.flags,
             self.units_per_em,
             self.created_time,
@@ -154,7 +159,7 @@ class HeadTable(SfntTable):
         stream.write_uint16(self.major_version)
         stream.write_uint16(self.minor_version)
         stream.write_fixed(self.font_revision)
-        stream.write_uint32(0)
+        stream.write_uint32(self.checksum_adjustment)
         stream.write_uint32(_MAGIC_NUMBER)
         stream.write_uint16(self.flags)
         stream.write_uint16(self.units_per_em)
