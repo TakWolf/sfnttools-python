@@ -1,3 +1,4 @@
+from datetime import datetime, UTC
 from enum import IntEnum
 from io import BytesIO
 from typing import Final
@@ -10,6 +11,8 @@ _MAGIC_NUMBER = 0x5F0F3CF5
 
 UNITS_PER_EM_MIN_VALUE: Final = 2 ** 4
 UNITS_PER_EM_MAX_VALUE: Final = 2 ** 14
+
+_EPOCH_1904_TIMESTAMP = int(datetime(1904, 1, 1, tzinfo=UTC).timestamp())
 
 
 class FontDirectionHint(IntEnum):
@@ -43,8 +46,8 @@ class HeadTable(SfntTable):
             raise SfntError('bad magic number')
         flags = stream.read_uint16()
         units_per_em = stream.read_uint16()
-        created_time = stream.read_long_datetime()
-        modified_time = stream.read_long_datetime()
+        created_timestamp_1904 = stream.read_long_datetime()
+        modified_timestamp_1904 = stream.read_long_datetime()
         x_min = stream.read_int16()
         y_min = stream.read_int16()
         x_max = stream.read_int16()
@@ -62,8 +65,8 @@ class HeadTable(SfntTable):
             checksum_adjustment,
             flags,
             units_per_em,
-            created_time,
-            modified_time,
+            created_timestamp_1904,
+            modified_timestamp_1904,
             x_min,
             y_min,
             x_max,
@@ -81,8 +84,8 @@ class HeadTable(SfntTable):
     checksum_adjustment: int
     flags: int
     units_per_em: int
-    created_time: int
-    modified_time: int
+    created_timestamp_1904: int
+    modified_timestamp_1904: int
     x_min: int
     y_min: int
     x_max: int
@@ -101,8 +104,8 @@ class HeadTable(SfntTable):
             checksum_adjustment: int = 0,
             flags: int = 0,
             units_per_em: int = UNITS_PER_EM_MIN_VALUE,
-            created_time: int = 0,
-            modified_time: int = 0,
+            created_timestamp_1904: int = 0,
+            modified_timestamp_1904: int = 0,
             x_min: int = 0,
             y_min: int = 0,
             x_max: int = 0,
@@ -119,8 +122,8 @@ class HeadTable(SfntTable):
         self.checksum_adjustment = checksum_adjustment
         self.flags = flags
         self.units_per_em = units_per_em
-        self.created_time = created_time
-        self.modified_time = modified_time
+        self.created_timestamp_1904 = created_timestamp_1904
+        self.modified_timestamp_1904 = modified_timestamp_1904
         self.x_min = x_min
         self.y_min = y_min
         self.x_max = x_max
@@ -131,6 +134,38 @@ class HeadTable(SfntTable):
         self.index_to_loc_format = index_to_loc_format
         self.glyph_data_format = glyph_data_format
 
+    @property
+    def created_timestamp(self) -> int:
+        return self.created_timestamp_1904 + _EPOCH_1904_TIMESTAMP
+
+    @created_timestamp.setter
+    def created_timestamp(self, value: int):
+        self.created_timestamp_1904 = value - _EPOCH_1904_TIMESTAMP
+
+    @property
+    def created_datetime(self) -> datetime:
+        return datetime.fromtimestamp(self.created_timestamp, UTC)
+
+    @created_datetime.setter
+    def created_datetime(self, value: datetime):
+        self.created_timestamp = int(value.timestamp())
+
+    @property
+    def modified_timestamp(self) -> int:
+        return self.modified_timestamp_1904 + _EPOCH_1904_TIMESTAMP
+
+    @modified_timestamp.setter
+    def modified_timestamp(self, value: int):
+        self.modified_timestamp_1904 = value - _EPOCH_1904_TIMESTAMP
+
+    @property
+    def modified_datetime(self) -> datetime:
+        return datetime.fromtimestamp(self.modified_timestamp, UTC)
+
+    @modified_datetime.setter
+    def modified_datetime(self, value: datetime):
+        self.modified_timestamp = int(value.timestamp())
+
     def copy(self) -> 'HeadTable':
         return HeadTable(
             self.major_version,
@@ -139,8 +174,8 @@ class HeadTable(SfntTable):
             self.checksum_adjustment,
             self.flags,
             self.units_per_em,
-            self.created_time,
-            self.modified_time,
+            self.created_timestamp_1904,
+            self.modified_timestamp_1904,
             self.x_min,
             self.y_min,
             self.x_max,
@@ -163,8 +198,8 @@ class HeadTable(SfntTable):
         stream.write_uint32(_MAGIC_NUMBER)
         stream.write_uint16(self.flags)
         stream.write_uint16(self.units_per_em)
-        stream.write_long_datetime(self.created_time)
-        stream.write_long_datetime(self.modified_time)
+        stream.write_long_datetime(self.created_timestamp_1904)
+        stream.write_long_datetime(self.modified_timestamp_1904)
         stream.write_int16(self.x_min)
         stream.write_int16(self.y_min)
         stream.write_int16(self.x_max)
