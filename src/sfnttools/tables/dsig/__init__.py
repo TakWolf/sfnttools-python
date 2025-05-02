@@ -22,7 +22,8 @@ class DsigPermissionFlags:
     ):
         self.cannot_be_resigned = cannot_be_resigned
 
-    def to_value(self) -> int:
+    @property
+    def value(self) -> int:
         value = 0
         if self.cannot_be_resigned:
             value |= 0b_0000_0000_0000_0001

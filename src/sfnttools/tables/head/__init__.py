@@ -70,7 +70,8 @@ class HeadTableFlags:
         self.font_optimized_for_cleartype = font_optimized_for_cleartype
         self.last_resort_font = last_resort_font
 
-    def to_value(self) -> int:
+    @property
+    def value(self) -> int:
         value = 0
         if self.baseline_at_y0:
             value |= 0b_0000_0000_0000_0001
@@ -139,7 +140,8 @@ class MacStyle:
         self.condensed = condensed
         self.extended = extended
 
-    def to_value(self) -> int:
+    @property
+    def value(self) -> int:
         value = 0
         if self.bold:
             value |= 0b_0000_0000_0000_0001
