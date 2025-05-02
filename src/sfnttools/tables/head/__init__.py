@@ -14,6 +14,150 @@ UNITS_PER_EM_MIN_VALUE: Final = 2 ** 4
 UNITS_PER_EM_MAX_VALUE: Final = 2 ** 14
 
 
+class HeadTableFlags:
+    @staticmethod
+    def from_value(value) -> 'HeadTableFlags':
+        baseline_at_y0 = value & 0b_0000_0000_0000_0001 > 0
+        left_sidebearing_at_x0 = value & 0b_0000_0000_0000_0010 > 0
+        instructions_may_depend_on_point_size = value & 0b_0000_0000_0000_0100 > 0
+        force_ppem_to_integer = value & 0b_0000_0000_0000_1000 > 0
+        instructions_may_alter_advance_width = value & 0b_0000_0000_0001_0000 > 0
+        font_data_is_lossless_after_optimization = value & 0b_0000_1000_0000_0000 > 0
+        font_converted = value & 0b_0001_0000_0000_0000 > 0
+        font_optimized_for_cleartype = value & 0b_0010_0000_0000_0000 > 0
+        last_resort_font = value & 0b_0100_0000_0000_0000 > 0
+        return HeadTableFlags(
+            baseline_at_y0,
+            left_sidebearing_at_x0,
+            instructions_may_depend_on_point_size,
+            force_ppem_to_integer,
+            instructions_may_alter_advance_width,
+            font_data_is_lossless_after_optimization,
+            font_converted,
+            font_optimized_for_cleartype,
+            last_resort_font,
+        )
+
+    baseline_at_y0: bool
+    left_sidebearing_at_x0: bool
+    instructions_may_depend_on_point_size: bool
+    force_ppem_to_integer: bool
+    instructions_may_alter_advance_width: bool
+    font_data_is_lossless_after_optimization: bool
+    font_converted: bool
+    font_optimized_for_cleartype: bool
+    last_resort_font: bool
+
+    def __init__(
+            self,
+            baseline_at_y0: bool = False,
+            left_sidebearing_at_x0: bool = False,
+            instructions_may_depend_on_point_size: bool = False,
+            force_ppem_to_integer: bool = False,
+            instructions_may_alter_advance_width: bool = False,
+            font_data_is_lossless_after_optimization: bool = False,
+            font_converted: bool = False,
+            font_optimized_for_cleartype: bool = False,
+            last_resort_font: bool = False,
+    ):
+        self.baseline_at_y0 = baseline_at_y0
+        self.left_sidebearing_at_x0 = left_sidebearing_at_x0
+        self.instructions_may_depend_on_point_size = instructions_may_depend_on_point_size
+        self.force_ppem_to_integer = force_ppem_to_integer
+        self.instructions_may_alter_advance_width = instructions_may_alter_advance_width
+        self.font_data_is_lossless_after_optimization = font_data_is_lossless_after_optimization
+        self.font_converted = font_converted
+        self.font_optimized_for_cleartype = font_optimized_for_cleartype
+        self.last_resort_font = last_resort_font
+
+    def to_value(self) -> int:
+        value = 0
+        if self.baseline_at_y0:
+            value |= 0b_0000_0000_0000_0001
+        if self.left_sidebearing_at_x0:
+            value |= 0b_0000_0000_0000_0010
+        if self.instructions_may_depend_on_point_size:
+            value |= 0b_0000_0000_0000_0100
+        if self.force_ppem_to_integer:
+            value |= 0b_0000_0000_0000_1000
+        if self.instructions_may_alter_advance_width:
+            value |= 0b_0000_0000_0001_0000
+        if self.font_data_is_lossless_after_optimization:
+            value |= 0b_0000_1000_0000_0000
+        if self.font_converted:
+            value |= 0b_0001_0000_0000_0000
+        if self.font_optimized_for_cleartype:
+            value |= 0b_0010_0000_0000_0000
+        if self.last_resort_font:
+            value |= 0b_0100_0000_0000_0000
+        return value
+
+
+class MacStyle:
+    @staticmethod
+    def from_value(value) -> 'MacStyle':
+        bold = value & 0b_0000_0000_0000_0001 > 0
+        italic = value & 0b_0000_0000_0000_0010 > 0
+        underline = value & 0b_0000_0000_0000_0100 > 0
+        outline = value & 0b_0000_0000_0000_1000 > 0
+        shadow = value & 0b_0000_0000_0001_0000 > 0
+        condensed = value & 0b_0000_0000_0010_0000 > 0
+        extended = value & 0b_0000_0000_0100_0000 > 0
+        return MacStyle(
+            bold,
+            italic,
+            underline,
+            outline,
+            shadow,
+            condensed,
+            extended,
+        )
+
+    bold: bool
+    italic: bool
+    underline: bool
+    outline: bool
+    shadow: bool
+    condensed: bool
+    extended: bool
+
+    def __init__(
+            self,
+            bold: bool = False,
+            italic: bool = False,
+            underline: bool = False,
+            outline: bool = False,
+            shadow: bool = False,
+            condensed: bool = False,
+            extended: bool = False,
+    ):
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+        self.outline = outline
+        self.shadow = shadow
+        self.condensed = condensed
+        self.extended = extended
+
+    def to_value(self) -> int:
+        value = 0
+        if self.bold:
+            value |= 0b_0000_0000_0000_0001
+        if self.italic:
+            value |= 0b_0000_0000_0000_0010
+        if self.underline:
+            value |= 0b_0000_0000_0000_0100
+        if self.outline:
+            value |= 0b_0000_0000_0000_1000
+        if self.shadow:
+            value |= 0b_0000_0000_0001_0000
+        if self.condensed:
+            value |= 0b_0000_0000_0010_0000
+        if self.extended:
+            value |= 0b_0000_0000_0100_0000
+        return value
+
+
 class FontDirectionHint(IntEnum):
     FULLY_MIXED = 0
     LEFT_TO_RIGHT = 1
@@ -134,6 +278,10 @@ class HeadTable(SfntTable):
         self.glyph_data_format = glyph_data_format
 
     @property
+    def flags_obj(self) -> HeadTableFlags:
+        return HeadTableFlags.from_value(self.flags)
+
+    @property
     def created_timestamp(self) -> int:
         return seconds_since_1904_to_timestamp(self.created_seconds_since_1904)
 
@@ -164,6 +312,10 @@ class HeadTable(SfntTable):
     @modified_datetime.setter
     def modified_datetime(self, value: datetime):
         self.modified_timestamp = int(value.timestamp())
+
+    @property
+    def mac_style_obj(self) -> MacStyle:
+        return MacStyle.from_value(self.mac_style)
 
     def copy(self) -> 'HeadTable':
         return HeadTable(

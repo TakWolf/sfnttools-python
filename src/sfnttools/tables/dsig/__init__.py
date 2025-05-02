@@ -8,6 +8,27 @@ from sfnttools.tables.dsig.headers import SignatureRecord
 from sfnttools.utils.stream import Stream
 
 
+class DsigPermissionFlags:
+    @staticmethod
+    def from_value(value) -> 'DsigPermissionFlags':
+        cannot_be_resigned = value & 0b_0000_0000_0000_0001 > 0
+        return DsigPermissionFlags(cannot_be_resigned)
+
+    cannot_be_resigned: bool
+
+    def __init__(
+            self,
+            cannot_be_resigned: bool = False,
+    ):
+        self.cannot_be_resigned = cannot_be_resigned
+
+    def to_value(self) -> int:
+        value = 0
+        if self.cannot_be_resigned:
+            value |= 0b_0000_0000_0000_0001
+        return value
+
+
 @runtime_checkable
 class SignatureBlock(Protocol):
     @staticmethod
@@ -106,6 +127,10 @@ class DsigTable(SfntTable):
         self.version = version
         self.flags = flags
         self.signature_blocks = [] if signature_blocks is None else signature_blocks
+
+    @property
+    def flags_obj(self) -> DsigPermissionFlags:
+        return DsigPermissionFlags.from_value(self.flags)
 
     @property
     def num_signatures(self) -> int:
