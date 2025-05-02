@@ -13,9 +13,9 @@ class Stream:
             source = BytesIO(source)
         self.source = source
 
-    def read(self, size: int) -> bytes:
+    def read(self, size: int, ignore_eof: bool = False) -> bytes:
         values = self.source.read(size)
-        if len(values) < size:
+        if len(values) < size and not ignore_eof:
             raise EOFError()
         return values
 
