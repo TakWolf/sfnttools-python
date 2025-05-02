@@ -3,7 +3,7 @@ import pytest
 from sfnttools.utils.stream import Stream
 
 
-def test_byte():
+def test_bytes():
     stream = Stream()
     assert stream.write(b'Hello World') == 11
     assert stream.tell() == 11
