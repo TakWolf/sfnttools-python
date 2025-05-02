@@ -16,15 +16,16 @@ def test_eof():
     stream = Stream()
     with pytest.raises(EOFError):
         stream.read(1)
+    stream.read(1, ignore_eof=True)
 
 
 def test_uint8():
     stream = Stream()
-    assert stream.write_uint8(0) == 1
+    assert stream.write_uint8(0x00) == 1
     assert stream.write_uint8(0xFF) == 1
     assert stream.tell() == 2
     stream.seek(0)
-    assert stream.read_uint8() == 0
+    assert stream.read_uint8() == 0x00
     assert stream.read_uint8() == 0xFF
     assert stream.tell() == 2
 
@@ -42,11 +43,11 @@ def test_int8():
 
 def test_uint16():
     stream = Stream()
-    assert stream.write_uint16(0) == 2
+    assert stream.write_uint16(0x0000) == 2
     assert stream.write_uint16(0xFFFF) == 2
     assert stream.tell() == 4
     stream.seek(0)
-    assert stream.read_uint16() == 0
+    assert stream.read_uint16() == 0x0000
     assert stream.read_uint16() == 0xFFFF
     assert stream.tell() == 4
 
@@ -64,22 +65,22 @@ def test_int16():
 
 def test_uint24():
     stream = Stream()
-    assert stream.write_uint24(0) == 3
+    assert stream.write_uint24(0x000000) == 3
     assert stream.write_uint24(0xFFFFFF) == 3
     assert stream.tell() == 6
     stream.seek(0)
-    assert stream.read_uint24() == 0
+    assert stream.read_uint24() == 0x000000
     assert stream.read_uint24() == 0xFFFFFF
     assert stream.tell() == 6
 
 
 def test_uint32():
     stream = Stream()
-    assert stream.write_uint32(0) == 4
+    assert stream.write_uint32(0x00000000) == 4
     assert stream.write_uint32(0xFFFFFFFF) == 4
     assert stream.tell() == 8
     stream.seek(0)
-    assert stream.read_uint32() == 0
+    assert stream.read_uint32() == 0x00000000
     assert stream.read_uint32() == 0xFFFFFFFF
     assert stream.tell() == 8
 
@@ -119,11 +120,11 @@ def test_fword():
 
 def test_ufword():
     stream = Stream()
-    assert stream.write_ufword(0) == 2
+    assert stream.write_ufword(0x0000) == 2
     assert stream.write_ufword(0xFFFF) == 2
     assert stream.tell() == 4
     stream.seek(0)
-    assert stream.read_ufword() == 0
+    assert stream.read_ufword() == 0x0000
     assert stream.read_ufword() == 0xFFFF
     assert stream.tell() == 4
 
@@ -181,29 +182,29 @@ def test_tag():
 
 def test_offset8():
     stream = Stream()
-    assert stream.write_offset8(0) == 1
+    assert stream.write_offset8(0x00) == 1
     assert stream.write_offset8(0xFF) == 1
     assert stream.tell() == 2
     stream.seek(0)
-    assert stream.read_offset8() == 0
+    assert stream.read_offset8() == 0x00
     assert stream.read_offset8() == 0xFF
     assert stream.tell() == 2
 
 
 def test_offset16():
     stream = Stream()
-    assert stream.write_offset16(0) == 2
+    assert stream.write_offset16(0x0000) == 2
     assert stream.write_offset16(0xFFFF) == 2
     assert stream.tell() == 4
     stream.seek(0)
-    assert stream.read_offset16() == 0
+    assert stream.read_offset16() == 0x0000
     assert stream.read_offset16() == 0xFFFF
     assert stream.tell() == 4
 
 
 def test_offset24():
     stream = Stream()
-    assert stream.write_offset24(0) == 3
+    assert stream.write_offset24(0x000000) == 3
     assert stream.write_offset24(0xFFFFFF) == 3
     assert stream.tell() == 6
     stream.seek(0)
@@ -214,11 +215,11 @@ def test_offset24():
 
 def test_offset32():
     stream = Stream()
-    assert stream.write_offset32(0) == 4
+    assert stream.write_offset32(0x00000000) == 4
     assert stream.write_offset32(0xFFFFFFFF) == 4
     assert stream.tell() == 8
     stream.seek(0)
-    assert stream.read_offset32() == 0
+    assert stream.read_offset32() == 0x00000000
     assert stream.read_offset32() == 0xFFFFFFFF
     assert stream.tell() == 8
 
