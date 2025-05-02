@@ -14,9 +14,11 @@ def test_byte():
 
 def test_eof():
     stream = Stream()
+    stream.write(b'ABC')
     with pytest.raises(EOFError):
-        stream.read(1)
-    stream.read(1, ignore_eof=True)
+        stream.read(4)
+    stream.seek(0)
+    assert stream.read(4, ignore_eof=True) == b'ABC'
 
 
 def test_uint8():
