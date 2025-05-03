@@ -16,7 +16,7 @@ UNITS_PER_EM_MAX_VALUE: Final = 2 ** 14
 
 class HeadTableFlags:
     @staticmethod
-    def from_value(value) -> 'HeadTableFlags':
+    def parse(value) -> 'HeadTableFlags':
         baseline_at_y0 = value & 0b_0000_0000_0000_0001 > 0
         left_sidebearing_at_x0 = value & 0b_0000_0000_0000_0010 > 0
         instructions_may_depend_on_point_size = value & 0b_0000_0000_0000_0100 > 0
@@ -93,10 +93,23 @@ class HeadTableFlags:
             value |= 0b_0100_0000_0000_0000
         return value
 
+    def copy(self) -> 'HeadTableFlags':
+        return HeadTableFlags(
+            self.baseline_at_y0,
+            self.left_sidebearing_at_x0,
+            self.instructions_may_depend_on_point_size,
+            self.force_ppem_to_integer,
+            self.instructions_may_alter_advance_width,
+            self.font_data_is_lossless_after_optimization,
+            self.font_converted,
+            self.font_optimized_for_cleartype,
+            self.last_resort_font,
+        )
+
 
 class MacStyle:
     @staticmethod
-    def from_value(value) -> 'MacStyle':
+    def parse(value) -> 'MacStyle':
         bold = value & 0b_0000_0000_0000_0001 > 0
         italic = value & 0b_0000_0000_0000_0010 > 0
         underline = value & 0b_0000_0000_0000_0100 > 0
@@ -159,6 +172,17 @@ class MacStyle:
             value |= 0b_0000_0000_0100_0000
         return value
 
+    def copy(self) -> 'MacStyle':
+        return MacStyle(
+            self.bold,
+            self.italic,
+            self.underline,
+            self.outline,
+            self.shadow,
+            self.condensed,
+            self.extended,
+        )
+
 
 class FontDirectionHint(IntEnum):
     FULLY_MIXED = 0
@@ -189,7 +213,7 @@ class HeadTable(SfntTable):
         magic_number = stream.read_uint32()
         if magic_number != _MAGIC_NUMBER:
             raise SfntError('bad magic number')
-        flags = stream.read_uint16()
+        flags = HeadTableFlags.parse(stream.read_uint16())
         units_per_em = stream.read_uint16()
         created_seconds_since_1904 = stream.read_long_datetime()
         modified_seconds_since_1904 = stream.read_long_datetime()
@@ -197,7 +221,7 @@ class HeadTable(SfntTable):
         y_min = stream.read_int16()
         x_max = stream.read_int16()
         y_max = stream.read_int16()
-        mac_style = stream.read_uint16()
+        mac_style = MacStyle.parse(stream.read_uint16())
         lowest_rec_ppem = stream.read_uint16()
         font_direction_hint = FontDirectionHint(stream.read_int16())
         index_to_loc_format = IndexToLocFormat(stream.read_int16())
@@ -227,7 +251,7 @@ class HeadTable(SfntTable):
     minor_version: int
     font_revision: float
     checksum_adjustment: int
-    flags: int
+    flags: HeadTableFlags
     units_per_em: int
     created_seconds_since_1904: int
     modified_seconds_since_1904: int
@@ -235,7 +259,7 @@ class HeadTable(SfntTable):
     y_min: int
     x_max: int
     y_max: int
-    mac_style: int
+    mac_style: MacStyle
     lowest_rec_ppem: int
     font_direction_hint: FontDirectionHint
     index_to_loc_format: IndexToLocFormat
@@ -247,7 +271,7 @@ class HeadTable(SfntTable):
             minor_version: int = 0,
             font_revision: float = 0,
             checksum_adjustment: int = 0,
-            flags: int = 0,
+            flags: HeadTableFlags | None = None,
             units_per_em: int = UNITS_PER_EM_MIN_VALUE,
             created_seconds_since_1904: int = 0,
             modified_seconds_since_1904: int = 0,
@@ -255,7 +279,7 @@ class HeadTable(SfntTable):
             y_min: int = 0,
             x_max: int = 0,
             y_max: int = 0,
-            mac_style: int = 0,
+            mac_style: MacStyle | None = None,
             lowest_rec_ppem: int = 0,
             font_direction_hint: FontDirectionHint = FontDirectionHint.LEFT_TO_RIGHT_CONTAINS_NEUTRALS,
             index_to_loc_format: IndexToLocFormat = IndexToLocFormat.SHORT,
@@ -265,7 +289,7 @@ class HeadTable(SfntTable):
         self.minor_version = minor_version
         self.font_revision = font_revision
         self.checksum_adjustment = checksum_adjustment
-        self.flags = flags
+        self.flags = HeadTableFlags() if flags is None else flags
         self.units_per_em = units_per_em
         self.created_seconds_since_1904 = created_seconds_since_1904
         self.modified_seconds_since_1904 = modified_seconds_since_1904
@@ -273,15 +297,11 @@ class HeadTable(SfntTable):
         self.y_min = y_min
         self.x_max = x_max
         self.y_max = y_max
-        self.mac_style = mac_style
+        self.mac_style = MacStyle() if mac_style is None else mac_style
         self.lowest_rec_ppem = lowest_rec_ppem
         self.font_direction_hint = font_direction_hint
         self.index_to_loc_format = index_to_loc_format
         self.glyph_data_format = glyph_data_format
-
-    @property
-    def flags_obj(self) -> HeadTableFlags:
-        return HeadTableFlags.from_value(self.flags)
 
     @property
     def created_timestamp(self) -> int:
@@ -315,17 +335,13 @@ class HeadTable(SfntTable):
     def modified_datetime(self, value: datetime):
         self.modified_timestamp = int(value.timestamp())
 
-    @property
-    def mac_style_obj(self) -> MacStyle:
-        return MacStyle.from_value(self.mac_style)
-
     def copy(self) -> 'HeadTable':
         return HeadTable(
             self.major_version,
             self.minor_version,
             self.font_revision,
             self.checksum_adjustment,
-            self.flags,
+            self.flags.copy(),
             self.units_per_em,
             self.created_seconds_since_1904,
             self.modified_seconds_since_1904,
@@ -333,7 +349,7 @@ class HeadTable(SfntTable):
             self.y_min,
             self.x_max,
             self.y_max,
-            self.mac_style,
+            self.mac_style.copy(),
             self.lowest_rec_ppem,
             self.font_direction_hint,
             self.index_to_loc_format,
@@ -349,7 +365,7 @@ class HeadTable(SfntTable):
         stream.write_fixed(self.font_revision)
         stream.write_uint32(self.checksum_adjustment)
         stream.write_uint32(_MAGIC_NUMBER)
-        stream.write_uint16(self.flags)
+        stream.write_uint16(self.flags.value)
         stream.write_uint16(self.units_per_em)
         stream.write_long_datetime(self.created_seconds_since_1904)
         stream.write_long_datetime(self.modified_seconds_since_1904)
@@ -357,7 +373,7 @@ class HeadTable(SfntTable):
         stream.write_int16(self.y_min)
         stream.write_int16(self.x_max)
         stream.write_int16(self.y_max)
-        stream.write_uint16(self.mac_style)
+        stream.write_uint16(self.mac_style.value)
         stream.write_uint16(self.lowest_rec_ppem)
         stream.write_int16(self.font_direction_hint)
         stream.write_int16(self.index_to_loc_format)

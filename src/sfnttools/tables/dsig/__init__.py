@@ -10,7 +10,7 @@ from sfnttools.utils.stream import Stream
 
 class DsigPermissionFlags:
     @staticmethod
-    def from_value(value) -> 'DsigPermissionFlags':
+    def parse(value) -> 'DsigPermissionFlags':
         cannot_be_resigned = value & 0b_0000_0000_0000_0001 > 0
         return DsigPermissionFlags(cannot_be_resigned)
 
@@ -28,6 +28,9 @@ class DsigPermissionFlags:
         if self.cannot_be_resigned:
             value |= 0b_0000_0000_0000_0001
         return value
+
+    def copy(self) -> 'DsigPermissionFlags':
+        return DsigPermissionFlags(self.cannot_be_resigned)
 
 
 @runtime_checkable
@@ -99,7 +102,7 @@ class DsigTable(SfntTable):
 
         version = stream.read_uint32()
         num_signatures = stream.read_uint16()
-        flags = stream.read_uint16()
+        flags = DsigPermissionFlags.parse(stream.read_uint16())
         signature_blocks = []
         signature_records = [SignatureRecord.parse(stream) for _ in range(num_signatures)]
         for signature_record in signature_records:
@@ -116,22 +119,18 @@ class DsigTable(SfntTable):
         )
 
     version: int
-    flags: int
+    flags: DsigPermissionFlags
     signature_blocks: list[SignatureBlock]
 
     def __init__(
             self,
             version: int = 1,
-            flags: int = 0,
+            flags: DsigPermissionFlags | None = None,
             signature_blocks: list[SignatureBlock] | None = None,
     ):
         self.version = version
-        self.flags = flags
+        self.flags = DsigPermissionFlags() if flags is None else flags
         self.signature_blocks = [] if signature_blocks is None else signature_blocks
-
-    @property
-    def flags_obj(self) -> DsigPermissionFlags:
-        return DsigPermissionFlags.from_value(self.flags)
 
     @property
     def num_signatures(self) -> int:
@@ -140,7 +139,7 @@ class DsigTable(SfntTable):
     def copy(self) -> 'DsigTable':
         return DsigTable(
             self.version,
-            self.flags,
+            self.flags.copy(),
             [signature_block.copy() for signature_block in self.signature_blocks],
         )
 
@@ -162,7 +161,7 @@ class DsigTable(SfntTable):
         stream.seek(0)
         stream.write_uint32(self.version)
         stream.write_uint16(self.num_signatures)
-        stream.write_uint16(self.flags)
+        stream.write_uint16(self.flags.value)
         for signature_record in signature_records:
             signature_record.dump(stream)
 
