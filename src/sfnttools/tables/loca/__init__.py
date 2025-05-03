@@ -10,13 +10,13 @@ from sfnttools.utils.stream import Stream
 class LocaTable(SfntTable):
     @staticmethod
     def parse(data: bytes, container: SfntTableContainer) -> 'LocaTable':
-        head_table: HeadTable = container.get_table('head')
         maxp_table: MaxpTable = container.get_table('maxp')
+        head_table: HeadTable = container.get_table('head')
 
         stream = Stream(data)
 
         offsets = []
-        for i in range(maxp_table.num_glyphs + 1):
+        for _ in range(maxp_table.num_glyphs + 1):
             if head_table.index_to_loc_format == IndexToLocFormat.SHORT:
                 offset = stream.read_offset16()
             else:
@@ -34,8 +34,8 @@ class LocaTable(SfntTable):
         return LocaTable(self.offsets.copy())
 
     def dump(self, container: SfntTableContainer) -> bytes:
-        head_table: HeadTable = container.get_table('head')
         maxp_table: MaxpTable = container.get_table('maxp')
+        head_table: HeadTable = container.get_table('head')
 
         if len(self.offsets) != maxp_table.num_glyphs + 1:
             raise SfntError('[loca] bad offsets length')
