@@ -18,7 +18,7 @@ class LocaTable(SfntTable):
         offsets = []
         for _ in range(maxp_table.num_glyphs + 1):
             if head_table.index_to_loc_format == IndexToLocFormat.SHORT:
-                offset = stream.read_offset16()
+                offset = stream.read_offset16() * 2
             else:
                 offset = stream.read_offset32()
             offsets.append(offset)
@@ -37,7 +37,7 @@ class LocaTable(SfntTable):
         maxp_table: MaxpTable = container.get_table('maxp')
         head_table: HeadTable = container.get_table('head')
 
-        if len(self.offsets) != maxp_table.num_glyphs + 1:
+        if len(self.offsets) - 1 != maxp_table.num_glyphs:
             raise SfntError('[loca] bad offsets length')
 
         buffer = BytesIO()
@@ -45,7 +45,7 @@ class LocaTable(SfntTable):
 
         for offset in self.offsets:
             if head_table.index_to_loc_format == IndexToLocFormat.SHORT:
-                stream.write_offset16(offset)
+                stream.write_offset16(offset // 2)
             else:
                 stream.write_offset32(offset)
 

@@ -16,10 +16,7 @@ class DsigPermissionFlags:
 
     cannot_be_resigned: bool
 
-    def __init__(
-            self,
-            cannot_be_resigned: bool = False,
-    ):
+    def __init__(self, cannot_be_resigned: bool = False):
         self.cannot_be_resigned = cannot_be_resigned
 
     @property

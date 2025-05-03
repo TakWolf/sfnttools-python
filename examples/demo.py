@@ -5,9 +5,12 @@ from sfnttools.font import SfntFont, SfntFontCollection
 
 
 def main():
-    tt = TTFont(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.ttf'))
-    t_loca = tt['loca']
-    t_glyf = tt['glyf']
+    ts1 = TTFont(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.ttf'))
+    ts1['loca']
+    ts1['glyf']
+    ts2 = TTFont(assets_dir.joinpath('demo', 'demo.ttf'))
+    ts2['loca']
+    ts2['glyf']
 
     s1 = SfntFont.load(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.otf'), verify_checksum=False)
     # s2 = SfntFont.load(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.otf.woff2'), verify_checksum=False)
