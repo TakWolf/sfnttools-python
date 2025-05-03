@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from enum import IntEnum
 from io import BytesIO
 from typing import Final
@@ -313,7 +313,7 @@ class HeadTable(SfntTable):
 
     @property
     def created_datetime(self) -> datetime:
-        return datetime.fromtimestamp(self.created_timestamp, UTC)
+        return datetime.fromtimestamp(self.created_timestamp, timezone.utc)
 
     @created_datetime.setter
     def created_datetime(self, value: datetime):
@@ -329,7 +329,7 @@ class HeadTable(SfntTable):
 
     @property
     def modified_datetime(self) -> datetime:
-        return datetime.fromtimestamp(self.modified_timestamp, UTC)
+        return datetime.fromtimestamp(self.modified_timestamp, timezone.utc)
 
     @modified_datetime.setter
     def modified_datetime(self, value: datetime):
