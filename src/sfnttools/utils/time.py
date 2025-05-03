@@ -1,6 +1,6 @@
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
-_TIMESTAMP_1904 = int(datetime(1904, 1, 1, tzinfo=UTC).timestamp())
+_TIMESTAMP_1904 = int(datetime(1904, 1, 1, tzinfo=timezone.utc).timestamp())
 
 
 def seconds_since_1904_to_timestamp(value: int) -> int:
