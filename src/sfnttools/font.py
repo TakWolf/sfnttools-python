@@ -17,11 +17,11 @@ from sfnttools.xtf.reader import XtfReader, XtfCollectionReader
 class SfntFont(UserDict[str, SfntTable]):
     @staticmethod
     def parse(
-            stream: bytes | BinaryIO,
+            stream: bytes | bytearray | BinaryIO,
             font_index: int | None = None,
             verify_checksum: bool = False,
     ) -> 'SfntFont':
-        if isinstance(stream, bytes):
+        if isinstance(stream, (bytes, bytearray)):
             stream = BytesIO(stream)
         stream = Stream(stream)
 
@@ -104,11 +104,11 @@ class SfntFont(UserDict[str, SfntTable]):
 class SfntFontCollection(UserList[SfntFont]):
     @staticmethod
     def parse(
-            stream: bytes | BinaryIO,
+            stream: bytes | bytearray | BinaryIO,
             share_tables: bool = True,
             verify_checksum: bool = False,
     ) -> 'SfntFontCollection':
-        if isinstance(stream, bytes):
+        if isinstance(stream, (bytes, bytearray)):
             stream = BytesIO(stream)
         stream = Stream(stream)
 
