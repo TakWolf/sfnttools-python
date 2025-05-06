@@ -4,7 +4,7 @@ from io import BytesIO
 from typing import Final
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableContainer, SfntTable, SfntFlags
 from sfnttools.utils.stream import Stream
 from sfnttools.utils.time import seconds_since_1904_to_timestamp, timestamp_to_seconds_since_1904
 
@@ -32,7 +32,7 @@ MAC_STYLE_MASK_CONDENSED: Final = 0b_0000_0000_0010_0000
 MAC_STYLE_MASK_EXTENDED: Final = 0b_0000_0000_0100_0000
 
 
-class HeadTableFlags:
+class HeadTableFlags(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'HeadTableFlags':
         baseline_at_y0 = value & HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 > 0
@@ -125,7 +125,7 @@ class HeadTableFlags:
         )
 
 
-class MacStyle:
+class MacStyle(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'MacStyle':
         bold = value & MAC_STYLE_MASK_BOLD > 0

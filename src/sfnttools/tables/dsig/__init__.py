@@ -3,14 +3,14 @@ from io import BytesIO
 from typing import Final, Protocol, runtime_checkable
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableContainer, SfntTable, SfntFlags
 from sfnttools.tables.dsig.headers import SignatureRecord
 from sfnttools.utils.stream import Stream
 
 DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED: Final = 0b_0000_0000_0000_0001
 
 
-class DsigPermissionFlags:
+class DsigPermissionFlags(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'DsigPermissionFlags':
         cannot_be_resigned = value & DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED > 0
