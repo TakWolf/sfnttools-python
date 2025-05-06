@@ -34,7 +34,7 @@ MAC_STYLE_MASK_EXTENDED: Final = 0b_0000_0000_0100_0000
 
 class HeadTableFlags:
     @staticmethod
-    def parse(value) -> 'HeadTableFlags':
+    def parse(value: int) -> 'HeadTableFlags':
         baseline_at_y0 = value & HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 > 0
         left_sidebearing_at_x0 = value & HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 > 0
         instructions_may_depend_on_point_size = value & HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE > 0
@@ -127,7 +127,7 @@ class HeadTableFlags:
 
 class MacStyle:
     @staticmethod
-    def parse(value) -> 'MacStyle':
+    def parse(value: int) -> 'MacStyle':
         bold = value & MAC_STYLE_MASK_BOLD > 0
         italic = value & MAC_STYLE_MASK_ITALIC > 0
         underline = value & MAC_STYLE_MASK_UNDERLINE > 0

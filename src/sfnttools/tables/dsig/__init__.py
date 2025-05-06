@@ -12,7 +12,7 @@ DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED: Final = 0b_0000_0000_0000_0001
 
 class DsigPermissionFlags:
     @staticmethod
-    def parse(value) -> 'DsigPermissionFlags':
+    def parse(value: int) -> 'DsigPermissionFlags':
         cannot_be_resigned = value & DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED > 0
         return DsigPermissionFlags(cannot_be_resigned)
 
