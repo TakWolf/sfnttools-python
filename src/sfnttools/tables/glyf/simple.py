@@ -159,7 +159,7 @@ class SimpleGlyphTable(GlyphDescription):
 
         coordinates = []
         for flags, (x, y) in zip(flags_list, zip(x_coordinates, y_coordinates)):
-            coordinates.append(GlyphCoordinate(flags, x, y))
+            coordinates.append(GlyphCoordinate(x, y, flags.on_curve_point))
 
         return SimpleGlyphTable(
             x_min,
