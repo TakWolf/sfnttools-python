@@ -4,7 +4,8 @@ from io import BytesIO
 from typing import Final
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableContainer, SfntTable, SfntFlags
+from sfnttools.flags import SfntFlags
+from sfnttools.table import SfntTableContainer, SfntTable
 from sfnttools.utils.stream import Stream
 from sfnttools.utils.time import seconds_since_1904_to_timestamp, timestamp_to_seconds_since_1904
 

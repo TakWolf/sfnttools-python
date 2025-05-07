@@ -1,7 +1,7 @@
 from io import BytesIO
 from typing import Final
 
-from sfnttools.table import SfntFlags
+from sfnttools.flags import SfntFlags
 from sfnttools.utils.stream import Stream
 
 COMPONENT_GLYPH_FLAGS_MASK_ARG_1_AND_2_ARE_WORDS: Final = 0b_0000_0000_0000_0001

@@ -2,7 +2,7 @@ from io import BytesIO
 from typing import Final
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntFlags
+from sfnttools.flags import SfntFlags
 from sfnttools.utils.stream import Stream
 
 SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT: Final = 0b_0000_0001

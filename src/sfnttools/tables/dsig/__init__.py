@@ -3,7 +3,8 @@ from io import BytesIO
 from typing import Final, Protocol, runtime_checkable
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableContainer, SfntTable, SfntFlags
+from sfnttools.flags import SfntFlags
+from sfnttools.table import SfntTableContainer, SfntTable
 from sfnttools.tables.dsig.headers import SignatureRecord
 from sfnttools.utils.stream import Stream
 
