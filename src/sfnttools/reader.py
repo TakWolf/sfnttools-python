@@ -106,8 +106,9 @@ class SfntReader(SfntTableReader):
 
 
 class SfntCollectionReader:
+    @property
     @abstractmethod
-    def get_num_fonts(self) -> int:
+    def num_fonts(self) -> int:
         raise NotImplementedError()
 
     @abstractmethod

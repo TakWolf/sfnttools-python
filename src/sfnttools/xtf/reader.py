@@ -107,7 +107,8 @@ class XtfCollectionReader(SfntCollectionReader):
         self.share_tables = share_tables
         self.verify_checksum = verify_checksum
 
-    def get_num_fonts(self) -> int:
+    @property
+    def num_fonts(self) -> int:
         return self.header.num_fonts
 
     def create_reader(self, font_index: int) -> SfntReader:

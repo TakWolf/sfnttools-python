@@ -136,7 +136,8 @@ class Woff2CollectionReader(SfntCollectionReader):
         self.collection_tables_cache = {}
         self.share_tables = share_tables
 
-    def get_num_fonts(self) -> int:
+    @property
+    def num_fonts(self) -> int:
         return self.header.collection_header.num_fonts
 
     def create_reader(self, font_index: int) -> SfntReader:

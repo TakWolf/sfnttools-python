@@ -126,7 +126,7 @@ class SfntFontCollection(UserList[SfntFont]):
             raise SfntError('unsupported collection font')
 
         fonts = []
-        for font_index in range(collection_reader.get_num_fonts()):
+        for font_index in range(collection_reader.num_fonts):
             reader = collection_reader.create_reader(font_index)
             sfnt_version, tables = reader.parse_font()
             fonts.append(SfntFont(sfnt_version, tables))
