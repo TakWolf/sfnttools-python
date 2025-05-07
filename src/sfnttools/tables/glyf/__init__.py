@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from sfnttools.error import SfntError
 from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
 from sfnttools.tables.glyf.component import ComponentGlyph
 from sfnttools.tables.glyf.simple import SimpleGlyph
@@ -20,10 +21,13 @@ class GlyfTable(SfntTable):
             if glyph_data == b'':
                 glyph_description = None
             else:
-                if int.from_bytes(glyph_data[0:2], 'big', signed=True) >= 0:
+                num_contours = int.from_bytes(glyph_data[0:2], 'big', signed=True)
+                if num_contours > 0:
                     glyph_description = SimpleGlyph.parse(glyph_data)
-                else:
+                elif num_contours < 0:
                     glyph_description = ComponentGlyph.parse(glyph_data)
+                else:
+                    raise SfntError('[glyf] bad glyph data')
             glyph_descriptions.append(glyph_description)
 
         return GlyfTable(glyph_descriptions)
