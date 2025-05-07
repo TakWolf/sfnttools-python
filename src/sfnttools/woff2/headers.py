@@ -81,20 +81,22 @@ class Woff2TableDirectoryEntry:
         tag = _KNOWN_TABLE_TAGS[tag_index] if tag_index < len(_KNOWN_TABLE_TAGS) else stream.read_tag()
         orig_length = stream.read_uint_base128()
         transform_version = flags >> 6
-        transformed = transform_version != 3 if tag in ('glyf', 'loca') else transform_version != 0
-        transform_length = stream.read_uint_base128() if transformed else None
+        if transform_version != 3 if tag in ('glyf', 'loca') else transform_version != 0:
+            transform_length = stream.read_uint_base128()
+            if tag == 'loca' and transform_length != 0:
+                raise SfntError("woff2 transformed table 'loca' length must be 0")
+        else:
+            transform_length = None
         return Woff2TableDirectoryEntry(
             tag,
             offset,
             orig_length,
-            transform_version,
             transform_length,
         )
 
     tag: str
     offset: int
     orig_length: int
-    transform_version: int
     transform_length: int | None
 
     def __init__(
@@ -102,14 +104,16 @@ class Woff2TableDirectoryEntry:
             tag: str,
             offset: int,
             orig_length: int,
-            transform_version: int,
             transform_length: int | None,
     ):
         self.tag = tag
         self.offset = offset
         self.orig_length = orig_length
-        self.transform_version = transform_version
         self.transform_length = transform_length
+
+    @property
+    def transformed(self) -> bool:
+        return self.transform_length is not None
 
     @property
     def length(self) -> int:
@@ -121,17 +125,24 @@ class Woff2TableDirectoryEntry:
         return data
 
     def dump(self, stream: Stream):
+        if self.tag == 'loca' and self.transform_length is not None and self.transform_length != 0:
+            raise SfntError("woff2 transformed table 'loca' length must be 0")
+
         try:
             tag_index = _KNOWN_TABLE_TAGS.index(self.tag)
         except ValueError:
             tag_index = len(_KNOWN_TABLE_TAGS)
-        flags = self.transform_version << 6 | tag_index
+        if self.tag in ('glyf', 'loca'):
+            transform_version = 3 if self.transform_length is None else 0
+        else:
+            transform_version = 0 if self.transform_length is None else 1
+        flags = transform_version << 6 | tag_index
+
         stream.write_uint8(flags)
         if tag_index == len(_KNOWN_TABLE_TAGS):
             stream.write_tag(self.tag)
         stream.write_uint_base128(self.orig_length)
-        transformed = self.transform_version != 3 if self.tag in ('glyf', 'loca') else self.transform_version != 0
-        if transformed:
+        if self.transform_length is not None:
             stream.write_uint_base128(self.transform_length)
 
 
