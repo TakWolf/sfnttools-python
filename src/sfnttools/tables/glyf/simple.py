@@ -1,8 +1,8 @@
+from io import BytesIO
 from typing import Final
 
 from sfnttools.error import SfntError
 from sfnttools.table import SfntFlags
-from sfnttools.tables.glyf.description import GlyphDescription
 from sfnttools.utils.stream import Stream
 
 SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT: Final = 0b_0000_0001
@@ -96,7 +96,12 @@ class GlyphCoordinate:
     y: int
     on_curve_point: bool
 
-    def __init__(self, x: int, y: int, on_curve_point: bool):
+    def __init__(
+            self,
+            x: int = 0,
+            y: int = 0,
+            on_curve_point: bool = True,
+    ):
         self.x = x
         self.y = y
         self.on_curve_point = on_curve_point
@@ -108,14 +113,17 @@ class GlyphCoordinate:
         return GlyphCoordinate(self.x, self.y, self.on_curve_point)
 
 
-class SimpleGlyphTable(GlyphDescription):
+class SimpleGlyph:
     @staticmethod
-    def parse(stream: Stream) -> 'SimpleGlyphTable':
+    def parse(data: bytes) -> 'SimpleGlyph':
+        stream = Stream(data)
+
         num_contours = stream.read_int16()
         x_min = stream.read_int16()
         y_min = stream.read_int16()
         x_max = stream.read_int16()
         y_max = stream.read_int16()
+
         end_pts_of_contours = [stream.read_uint16() for _ in range(num_contours)]
         num_coordinates = end_pts_of_contours[-1] + 1
         instruction_length = stream.read_uint16()
@@ -161,14 +169,14 @@ class SimpleGlyphTable(GlyphDescription):
         for flags, (x, y) in zip(flags_list, zip(x_coordinates, y_coordinates)):
             coordinates.append(GlyphCoordinate(x, y, flags.on_curve_point))
 
-        return SimpleGlyphTable(
+        return SimpleGlyph(
             x_min,
             y_min,
             x_max,
             y_max,
             end_pts_of_contours,
-            instructions,
             coordinates,
+            instructions,
             flags_list[0].overlap_simple,
         )
 
@@ -177,8 +185,8 @@ class SimpleGlyphTable(GlyphDescription):
     x_max: int
     y_max: int
     end_pts_of_contours: list[int]
-    instructions: bytes
     coordinates: list[GlyphCoordinate]
+    instructions: bytes
     overlap_simple: bool
 
     def __init__(
@@ -188,8 +196,8 @@ class SimpleGlyphTable(GlyphDescription):
             x_max: int = 0,
             y_max: int = 0,
             end_pts_of_contours: list[int] | None = None,
-            instructions: bytes = b'',
             coordinates: list[GlyphCoordinate] | None = None,
+            instructions: bytes = b'',
             overlap_simple: bool = False,
     ):
         self.x_min = x_min
@@ -197,28 +205,43 @@ class SimpleGlyphTable(GlyphDescription):
         self.x_max = x_max
         self.y_max = y_max
         self.end_pts_of_contours = [] if end_pts_of_contours is None else end_pts_of_contours
-        self.instructions = instructions
         self.coordinates = [] if coordinates is None else coordinates
+        self.instructions = instructions
         self.overlap_simple = overlap_simple
 
     @property
     def num_contours(self) -> int:
         return len(self.end_pts_of_contours)
 
-    def copy(self) -> 'SimpleGlyphTable':
-        return SimpleGlyphTable(
+    def copy(self) -> 'SimpleGlyph':
+        return SimpleGlyph(
             self.x_min,
             self.y_min,
             self.x_max,
             self.y_max,
-            self.end_pts_of_contours,
+            self.end_pts_of_contours.copy(),
+            [coordinate.copy() for coordinate in self.coordinates],
             self.instructions,
-            self.coordinates,
             self.overlap_simple,
         )
 
     def dump(self) -> bytes:
+        if len(self.coordinates) != self.end_pts_of_contours[-1] + 1:
+            raise SfntError('[glyf] bad number of coordinates')
+
+        buffer = BytesIO()
+        stream = Stream(buffer)
+
+        stream.write_int16(self.num_contours)
+        stream.write_int16(self.x_min)
+        stream.write_int16(self.y_min)
+        stream.write_int16(self.x_max)
+        stream.write_int16(self.y_max)
+        for index in self.end_pts_of_contours:
+            stream.write_uint16(index)
+        stream.write_uint16(len(self.instructions))
+        stream.write(self.instructions)
 
         # TODO
 
-        pass
+        return buffer.getvalue()
