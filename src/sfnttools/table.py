@@ -3,9 +3,20 @@ from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
-class SfntTableContainer(Protocol):
+class SfntTableReader(Protocol):
     @abstractmethod
-    def get_table(self, tag: str) -> 'SfntTable':
+    def get_or_parse_table(self, tag: str) -> 'SfntTable':
+        raise NotImplementedError()
+
+
+@runtime_checkable
+class SfntTableWriter(Protocol):
+    @abstractmethod
+    def get_table(self, tag: str, readonly: bool = True) -> 'SfntTable':
+        raise NotImplementedError()
+
+    @abstractmethod
+    def replace_table(self, tag: str, table: 'SfntTable'):
         raise NotImplementedError()
 
 
@@ -13,7 +24,7 @@ class SfntTableContainer(Protocol):
 class SfntTable(Protocol):
     @staticmethod
     @abstractmethod
-    def parse(data: bytes, container: SfntTableContainer) -> 'SfntTable':
+    def parse(data: bytes, reader: SfntTableReader) -> 'SfntTable':
         raise NotImplementedError()
 
     @abstractmethod
@@ -21,5 +32,5 @@ class SfntTable(Protocol):
         raise NotImplementedError()
 
     @abstractmethod
-    def dump(self, container: SfntTableContainer) -> bytes:
+    def dump(self, writer: SfntTableWriter) -> bytes:
         raise NotImplementedError()

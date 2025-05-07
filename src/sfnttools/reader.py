@@ -3,12 +3,12 @@ from collections.abc import Iterator
 
 from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableReader, SfntTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.checksum import calculate_checksum, calculate_checksum_adjustment
 
 
-class SfntReader(SfntTableContainer):
+class SfntReader(SfntTableReader):
     share_tables: bool
     verify_checksum: bool
     tables_cache: dict[str, tuple[SfntTable, int]]
@@ -54,7 +54,7 @@ class SfntReader(SfntTableContainer):
     def read_woff_payload(self) -> WoffPayload | None:
         raise NotImplementedError()
 
-    def get_table(self, tag: str) -> SfntTable:
+    def get_or_parse_table(self, tag: str) -> SfntTable:
         table, checksum = self.tables_cache.get(tag, (None, None))
 
         if table is None and self.is_font_collection():
@@ -91,7 +91,7 @@ class SfntReader(SfntTableContainer):
         for tag in self.get_table_tags():
             if tag in tables:
                 raise SfntError(f'table {repr(tag)} duplicate')
-            table = self.get_table(tag)
+            table = self.get_or_parse_table(tag)
             tables[tag] = table
 
         if self.verify_checksum and not self.is_font_collection() and 'head' in self.tables_cache:

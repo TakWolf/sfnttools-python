@@ -5,7 +5,7 @@ from typing import Final
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
 from sfnttools.utils.stream import Stream
 from sfnttools.utils.time import seconds_since_1904_to_timestamp, timestamp_to_seconds_since_1904
 
@@ -222,7 +222,7 @@ class GlyphDataFormat(IntEnum):
 
 class HeadTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, container: SfntTableContainer) -> 'HeadTable':
+    def parse(data: bytes, reader: SfntTableReader) -> 'HeadTable':
         stream = Stream(data)
 
         major_version = stream.read_uint16()
@@ -375,7 +375,7 @@ class HeadTable(SfntTable):
             self.glyph_data_format,
         )
 
-    def dump(self, container: SfntTableContainer) -> bytes:
+    def dump(self, writer: SfntTableWriter) -> bytes:
         buffer = BytesIO()
         stream = Stream(buffer)
 

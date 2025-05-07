@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
 from sfnttools.tables.glyf.component import ComponentGlyph
 from sfnttools.tables.glyf.simple import SimpleGlyph
 from sfnttools.tables.loca import LocaTable
@@ -9,8 +9,8 @@ from sfnttools.utils.stream import Stream
 
 class GlyfTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, container: SfntTableContainer) -> 'GlyfTable':
-        loca_table: LocaTable = container.get_table('loca')
+    def parse(data: bytes, reader: SfntTableReader) -> 'GlyfTable':
+        loca_table: LocaTable = reader.get_or_parse_table('loca')
 
         glyph_descriptions = []
         for i in range(len(loca_table.offsets) - 1):
@@ -42,7 +42,7 @@ class GlyfTable(SfntTable):
             glyph_descriptions.append(None if glyph_description is None else glyph_description.copy())
         return GlyfTable(glyph_descriptions)
 
-    def dump(self, container: SfntTableContainer) -> bytes:
+    def dump(self, writer: SfntTableWriter) -> bytes:
         buffer = BytesIO()
         stream = Stream(buffer)
 

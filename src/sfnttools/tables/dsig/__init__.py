@@ -4,7 +4,7 @@ from typing import Final, Protocol, runtime_checkable
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
 from sfnttools.tables.dsig.headers import SignatureRecord
 from sfnttools.utils.stream import Stream
 
@@ -97,7 +97,7 @@ SIGNATURE_BLOCK_TYPE_REGISTRY: Final = {
 
 class DsigTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, container: SfntTableContainer | None = None) -> 'DsigTable':
+    def parse(data: bytes, reader: SfntTableReader | None = None) -> 'DsigTable':
         stream = Stream(data)
 
         version = stream.read_uint32()
@@ -143,7 +143,7 @@ class DsigTable(SfntTable):
             [signature_block.copy() for signature_block in self.signature_blocks],
         )
 
-    def dump(self, container: SfntTableContainer) -> bytes:
+    def dump(self, writer: SfntTableWriter) -> bytes:
         buffer = BytesIO()
         stream = Stream(buffer)
 

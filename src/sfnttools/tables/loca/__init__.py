@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableContainer, SfntTable
+from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
 from sfnttools.tables.head import HeadTable, IndexToLocFormat
 from sfnttools.tables.maxp import MaxpTable
 from sfnttools.utils.stream import Stream
@@ -9,9 +9,9 @@ from sfnttools.utils.stream import Stream
 
 class LocaTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, container: SfntTableContainer) -> 'LocaTable':
-        maxp_table: MaxpTable = container.get_table('maxp')
-        head_table: HeadTable = container.get_table('head')
+    def parse(data: bytes, reader: SfntTableReader) -> 'LocaTable':
+        maxp_table: MaxpTable = reader.get_or_parse_table('maxp')
+        head_table: HeadTable = reader.get_or_parse_table('head')
 
         stream = Stream(data)
 
@@ -33,9 +33,9 @@ class LocaTable(SfntTable):
     def copy(self) -> 'LocaTable':
         return LocaTable(self.offsets.copy())
 
-    def dump(self, container: SfntTableContainer) -> bytes:
-        maxp_table: MaxpTable = container.get_table('maxp')
-        head_table: HeadTable = container.get_table('head')
+    def dump(self, writer: SfntTableWriter) -> bytes:
+        maxp_table: MaxpTable = writer.get_table('maxp')
+        head_table: HeadTable = writer.get_table('head')
 
         if len(self.offsets) - 1 != maxp_table.num_glyphs:
             raise SfntError('[loca] bad offsets length')
