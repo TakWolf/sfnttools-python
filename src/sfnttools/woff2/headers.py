@@ -73,22 +73,66 @@ _KNOWN_TABLE_TAGS = [
 ]
 
 
+class Woff2TableDirectoryEntryFlags:
+    @staticmethod
+    def parse(stream: Stream) -> 'Woff2TableDirectoryEntryFlags':
+        value = stream.read_uint8()
+
+        tag_index = value & 0x3F
+        if tag_index < len(_KNOWN_TABLE_TAGS):
+            tag = _KNOWN_TABLE_TAGS[tag_index]
+        else:
+            tag = stream.read_tag()
+
+        transform_version = value >> 6
+        if tag in ('glyf', 'loca'):
+            transformed = transform_version != 3
+        else:
+            transformed = transform_version != 0
+
+        return Woff2TableDirectoryEntryFlags(tag, transformed)
+
+    tag: str
+    transformed: bool
+
+    def __init__(
+            self,
+            tag: str,
+            transformed: bool,
+    ):
+        self.tag = tag
+        self.transformed = transformed
+
+    def dump(self, stream: Stream):
+        try:
+            tag_index = _KNOWN_TABLE_TAGS.index(self.tag)
+        except ValueError:
+            tag_index = len(_KNOWN_TABLE_TAGS)
+
+        if self.tag in ('glyf', 'loca'):
+            transform_version = 0 if self.transformed else 3
+        else:
+            transform_version = 1 if self.transformed else 0
+
+        value = transform_version << 6 | tag_index
+        stream.write_uint8(value)
+        if tag_index == len(_KNOWN_TABLE_TAGS):
+            stream.write_tag(self.tag)
+
+
 class Woff2TableDirectoryEntry:
     @staticmethod
     def parse(stream: Stream, offset: int) -> 'Woff2TableDirectoryEntry':
-        flags = stream.read_uint8()
-        tag_index = flags & 0x3F
-        tag = _KNOWN_TABLE_TAGS[tag_index] if tag_index < len(_KNOWN_TABLE_TAGS) else stream.read_tag()
+        flags = Woff2TableDirectoryEntryFlags.parse(stream)
         orig_length = stream.read_uint_base128()
-        transform_version = flags >> 6
-        if transform_version != 3 if tag in ('glyf', 'loca') else transform_version != 0:
+        if flags.transformed:
             transform_length = stream.read_uint_base128()
-            if tag == 'loca' and transform_length != 0:
+            if flags.tag == 'loca' and transform_length != 0:
                 raise SfntError("woff2 transformed table 'loca' length must be 0")
         else:
             transform_length = None
         return Woff2TableDirectoryEntry(
-            tag,
+            flags.tag,
             offset,
             orig_length,
             transform_length,
@@ -125,24 +169,11 @@ class Woff2TableDirectoryEntry:
         return data
 
     def dump(self, stream: Stream):
-        if self.tag == 'loca' and self.transform_length is not None and self.transform_length != 0:
-            raise SfntError("woff2 transformed table 'loca' length must be 0")
-
-        try:
-            tag_index = _KNOWN_TABLE_TAGS.index(self.tag)
-        except ValueError:
-            tag_index = len(_KNOWN_TABLE_TAGS)
-        if self.tag in ('glyf', 'loca'):
-            transform_version = 3 if self.transform_length is None else 0
-        else:
-            transform_version = 0 if self.transform_length is None else 1
-        flags = transform_version << 6 | tag_index
-
-        stream.write_uint8(flags)
-        if tag_index == len(_KNOWN_TABLE_TAGS):
-            stream.write_tag(self.tag)
+        Woff2TableDirectoryEntryFlags(self.tag, self.transformed).dump(stream)
         stream.write_uint_base128(self.orig_length)
         if self.transform_length is not None:
+            if self.tag == 'loca' and self.transform_length != 0:
+                raise SfntError("woff2 transformed table 'loca' length must be 0")
             stream.write_uint_base128(self.transform_length)
 
 
