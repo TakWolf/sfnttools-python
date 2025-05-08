@@ -231,7 +231,7 @@ class HeadTable(SfntTable):
         checksum_adjustment = stream.read_uint32()
         magic_number = stream.read_uint32()
         if magic_number != _MAGIC_NUMBER:
-            raise SfntError('bad magic number')
+            raise SfntError('[head] bad magic number')
         flags = HeadTableFlags.parse(stream.read_uint16())
         units_per_em = stream.read_uint16()
         created_seconds_since_1904 = stream.read_long_datetime()
