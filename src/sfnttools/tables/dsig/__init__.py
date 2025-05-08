@@ -8,13 +8,13 @@ from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
 from sfnttools.tables.dsig.headers import SignatureRecord
 from sfnttools.utils.stream import Stream
 
-DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED: Final = 0b_0000_0000_0000_0001
+_DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED = 0b_0000_0000_0000_0001
 
 
 class DsigPermissionFlags(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'DsigPermissionFlags':
-        cannot_be_resigned = value & DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED > 0
+        cannot_be_resigned = value & _DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED > 0
         return DsigPermissionFlags(cannot_be_resigned)
 
     cannot_be_resigned: bool
@@ -26,7 +26,7 @@ class DsigPermissionFlags(SfntFlags):
     def value(self) -> int:
         value = 0
         if self.cannot_be_resigned:
-            value |= DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED
+            value |= _DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED
         return value
 
     def copy(self) -> 'DsigPermissionFlags':

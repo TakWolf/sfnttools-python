@@ -11,40 +11,40 @@ from sfnttools.utils.time import seconds_since_1904_to_timestamp, timestamp_to_s
 
 _MAGIC_NUMBER = 0x5F0F3CF5
 
+_HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 = 0b_0000_0000_0000_0001
+_HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 = 0b_0000_0000_0000_0010
+_HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE = 0b_0000_0000_0000_0100
+_HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER = 0b_0000_0000_0000_1000
+_HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH = 0b_0000_0000_0001_0000
+_HEAD_TABLE_FLAGS_MASK_FONT_DATA_IS_LOSSLESS_AFTER_OPTIMIZATION = 0b_0000_1000_0000_0000
+_HEAD_TABLE_FLAGS_MASK_FONT_CONVERTED = 0b_0001_0000_0000_0000
+_HEAD_TABLE_FLAGS_MASK_FONT_OPTIMIZED_FOR_CLEARTYPE = 0b_0010_0000_0000_0000
+_HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT = 0b_0100_0000_0000_0000
+
+_MAC_STYLE_MASK_BOLD = 0b_0000_0000_0000_0001
+_MAC_STYLE_MASK_ITALIC = 0b_0000_0000_0000_0010
+_MAC_STYLE_MASK_UNDERLINE = 0b_0000_0000_0000_0100
+_MAC_STYLE_MASK_OUTLINE = 0b_0000_0000_0000_1000
+_MAC_STYLE_MASK_SHADOW = 0b_0000_0000_0001_0000
+_MAC_STYLE_MASK_CONDENSED = 0b_0000_0000_0010_0000
+_MAC_STYLE_MASK_EXTENDED = 0b_0000_0000_0100_0000
+
 UNITS_PER_EM_MIN_VALUE: Final = 2 ** 4
 UNITS_PER_EM_MAX_VALUE: Final = 2 ** 14
-
-HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0: Final = 0b_0000_0000_0000_0001
-HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0: Final = 0b_0000_0000_0000_0010
-HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE: Final = 0b_0000_0000_0000_0100
-HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER: Final = 0b_0000_0000_0000_1000
-HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH: Final = 0b_0000_0000_0001_0000
-HEAD_TABLE_FLAGS_MASK_FONT_DATA_IS_LOSSLESS_AFTER_OPTIMIZATION: Final = 0b_0000_1000_0000_0000
-HEAD_TABLE_FLAGS_MASK_FONT_CONVERTED: Final = 0b_0001_0000_0000_0000
-HEAD_TABLE_FLAGS_MASK_FONT_OPTIMIZED_FOR_CLEARTYPE: Final = 0b_0010_0000_0000_0000
-HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT: Final = 0b_0100_0000_0000_0000
-
-MAC_STYLE_MASK_BOLD: Final = 0b_0000_0000_0000_0001
-MAC_STYLE_MASK_ITALIC: Final = 0b_0000_0000_0000_0010
-MAC_STYLE_MASK_UNDERLINE: Final = 0b_0000_0000_0000_0100
-MAC_STYLE_MASK_OUTLINE: Final = 0b_0000_0000_0000_1000
-MAC_STYLE_MASK_SHADOW: Final = 0b_0000_0000_0001_0000
-MAC_STYLE_MASK_CONDENSED: Final = 0b_0000_0000_0010_0000
-MAC_STYLE_MASK_EXTENDED: Final = 0b_0000_0000_0100_0000
 
 
 class HeadTableFlags(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'HeadTableFlags':
-        baseline_at_y0 = value & HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 > 0
-        left_sidebearing_at_x0 = value & HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 > 0
-        instructions_may_depend_on_point_size = value & HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE > 0
-        force_ppem_to_integer = value & HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER > 0
-        instructions_may_alter_advance_width = value & HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH > 0
-        font_data_is_lossless_after_optimization = value & HEAD_TABLE_FLAGS_MASK_FONT_DATA_IS_LOSSLESS_AFTER_OPTIMIZATION > 0
-        font_converted = value & HEAD_TABLE_FLAGS_MASK_FONT_CONVERTED > 0
-        font_optimized_for_cleartype = value & HEAD_TABLE_FLAGS_MASK_FONT_OPTIMIZED_FOR_CLEARTYPE > 0
-        last_resort_font = value & HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT > 0
+        baseline_at_y0 = value & _HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 > 0
+        left_sidebearing_at_x0 = value & _HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 > 0
+        instructions_may_depend_on_point_size = value & _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE > 0
+        force_ppem_to_integer = value & _HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER > 0
+        instructions_may_alter_advance_width = value & _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH > 0
+        font_data_is_lossless_after_optimization = value & _HEAD_TABLE_FLAGS_MASK_FONT_DATA_IS_LOSSLESS_AFTER_OPTIMIZATION > 0
+        font_converted = value & _HEAD_TABLE_FLAGS_MASK_FONT_CONVERTED > 0
+        font_optimized_for_cleartype = value & _HEAD_TABLE_FLAGS_MASK_FONT_OPTIMIZED_FOR_CLEARTYPE > 0
+        last_resort_font = value & _HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT > 0
         return HeadTableFlags(
             baseline_at_y0,
             left_sidebearing_at_x0,
@@ -93,23 +93,23 @@ class HeadTableFlags(SfntFlags):
     def value(self) -> int:
         value = 0
         if self.baseline_at_y0:
-            value |= HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0
+            value |= _HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0
         if self.left_sidebearing_at_x0:
-            value |= HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0
+            value |= _HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0
         if self.instructions_may_depend_on_point_size:
-            value |= HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE
+            value |= _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE
         if self.force_ppem_to_integer:
-            value |= HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER
+            value |= _HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER
         if self.instructions_may_alter_advance_width:
-            value |= HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH
+            value |= _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH
         if self.font_data_is_lossless_after_optimization:
-            value |= HEAD_TABLE_FLAGS_MASK_FONT_DATA_IS_LOSSLESS_AFTER_OPTIMIZATION
+            value |= _HEAD_TABLE_FLAGS_MASK_FONT_DATA_IS_LOSSLESS_AFTER_OPTIMIZATION
         if self.font_converted:
-            value |= HEAD_TABLE_FLAGS_MASK_FONT_CONVERTED
+            value |= _HEAD_TABLE_FLAGS_MASK_FONT_CONVERTED
         if self.font_optimized_for_cleartype:
-            value |= HEAD_TABLE_FLAGS_MASK_FONT_OPTIMIZED_FOR_CLEARTYPE
+            value |= _HEAD_TABLE_FLAGS_MASK_FONT_OPTIMIZED_FOR_CLEARTYPE
         if self.last_resort_font:
-            value |= HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT
+            value |= _HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT
         return value
 
     def copy(self) -> 'HeadTableFlags':
@@ -129,13 +129,13 @@ class HeadTableFlags(SfntFlags):
 class MacStyle(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'MacStyle':
-        bold = value & MAC_STYLE_MASK_BOLD > 0
-        italic = value & MAC_STYLE_MASK_ITALIC > 0
-        underline = value & MAC_STYLE_MASK_UNDERLINE > 0
-        outline = value & MAC_STYLE_MASK_OUTLINE > 0
-        shadow = value & MAC_STYLE_MASK_SHADOW > 0
-        condensed = value & MAC_STYLE_MASK_CONDENSED > 0
-        extended = value & MAC_STYLE_MASK_EXTENDED > 0
+        bold = value & _MAC_STYLE_MASK_BOLD > 0
+        italic = value & _MAC_STYLE_MASK_ITALIC > 0
+        underline = value & _MAC_STYLE_MASK_UNDERLINE > 0
+        outline = value & _MAC_STYLE_MASK_OUTLINE > 0
+        shadow = value & _MAC_STYLE_MASK_SHADOW > 0
+        condensed = value & _MAC_STYLE_MASK_CONDENSED > 0
+        extended = value & _MAC_STYLE_MASK_EXTENDED > 0
         return MacStyle(
             bold,
             italic,
@@ -176,19 +176,19 @@ class MacStyle(SfntFlags):
     def value(self) -> int:
         value = 0
         if self.bold:
-            value |= MAC_STYLE_MASK_BOLD
+            value |= _MAC_STYLE_MASK_BOLD
         if self.italic:
-            value |= MAC_STYLE_MASK_ITALIC
+            value |= _MAC_STYLE_MASK_ITALIC
         if self.underline:
-            value |= MAC_STYLE_MASK_UNDERLINE
+            value |= _MAC_STYLE_MASK_UNDERLINE
         if self.outline:
-            value |= MAC_STYLE_MASK_OUTLINE
+            value |= _MAC_STYLE_MASK_OUTLINE
         if self.shadow:
-            value |= MAC_STYLE_MASK_SHADOW
+            value |= _MAC_STYLE_MASK_SHADOW
         if self.condensed:
-            value |= MAC_STYLE_MASK_CONDENSED
+            value |= _MAC_STYLE_MASK_CONDENSED
         if self.extended:
-            value |= MAC_STYLE_MASK_EXTENDED
+            value |= _MAC_STYLE_MASK_EXTENDED
         return value
 
     def copy(self) -> 'MacStyle':

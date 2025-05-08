@@ -1,29 +1,28 @@
 from io import BytesIO
-from typing import Final
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
 from sfnttools.utils.stream import Stream
 
-SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT: Final = 0b_0000_0001
-SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR: Final = 0b_0000_0010
-SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR: Final = 0b_0000_0100
-SIMPLE_GLYPH_FLAGS_MASK_REPEAT_FLAG: Final = 0b_0000_1000
-SIMPLE_GLYPH_FLAGS_MASK_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR: Final = 0b_0001_0000
-SIMPLE_GLYPH_FLAGS_MASK_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR: Final = 0b_0010_0000
-SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE: Final = 0b_0100_0000
+_SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT = 0b_0000_0001
+_SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR = 0b_0000_0010
+_SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR = 0b_0000_0100
+_SIMPLE_GLYPH_FLAGS_MASK_REPEAT_FLAG = 0b_0000_1000
+_SIMPLE_GLYPH_FLAGS_MASK_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR = 0b_0001_0000
+_SIMPLE_GLYPH_FLAGS_MASK_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR = 0b_0010_0000
+_SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE = 0b_0100_0000
 
 
 class SimpleGlyphFlags(SfntFlags):
     @staticmethod
     def parse(value: int) -> 'SimpleGlyphFlags':
-        on_curve_point = value & SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT > 0
-        x_short_vector = value & SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR > 0
-        y_short_vector = value & SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR > 0
-        repeat_flag = value & SIMPLE_GLYPH_FLAGS_MASK_REPEAT_FLAG > 0
-        x_is_same_or_positive_x_short_vector = value & SIMPLE_GLYPH_FLAGS_MASK_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR > 0
-        y_is_same_or_positive_y_short_vector = value & SIMPLE_GLYPH_FLAGS_MASK_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR > 0
-        overlap_simple = value & SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE > 0
+        on_curve_point = value & _SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT > 0
+        x_short_vector = value & _SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR > 0
+        y_short_vector = value & _SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR > 0
+        repeat_flag = value & _SIMPLE_GLYPH_FLAGS_MASK_REPEAT_FLAG > 0
+        x_is_same_or_positive_x_short_vector = value & _SIMPLE_GLYPH_FLAGS_MASK_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR > 0
+        y_is_same_or_positive_y_short_vector = value & _SIMPLE_GLYPH_FLAGS_MASK_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR > 0
+        overlap_simple = value & _SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE > 0
         return SimpleGlyphFlags(
             on_curve_point,
             x_short_vector,
@@ -64,19 +63,19 @@ class SimpleGlyphFlags(SfntFlags):
     def value(self) -> int:
         value = 0
         if self.on_curve_point:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT
         if self.x_short_vector:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR
         if self.y_short_vector:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR
         if self.repeat_flag:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_REPEAT_FLAG
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_REPEAT_FLAG
         if self.x_is_same_or_positive_x_short_vector:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR
         if self.y_is_same_or_positive_y_short_vector:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR
         if self.overlap_simple:
-            value |= SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE
+            value |= _SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE
         return value
 
     def copy(self) -> 'SimpleGlyphFlags':
