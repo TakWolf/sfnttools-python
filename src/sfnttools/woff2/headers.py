@@ -78,7 +78,7 @@ class Woff2TableDirectoryEntryFlags:
     def parse(stream: Stream) -> 'Woff2TableDirectoryEntryFlags':
         value = stream.read_uint8()
 
-        tag_index = value & 0x3F
+        tag_index = value & 0b_0011_1111
         if tag_index < len(_KNOWN_TABLE_TAGS):
             tag = _KNOWN_TABLE_TAGS[tag_index]
         else:
