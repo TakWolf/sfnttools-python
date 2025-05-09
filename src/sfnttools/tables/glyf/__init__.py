@@ -2,8 +2,8 @@ from io import BytesIO
 
 from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
-from sfnttools.tables.glyf.component import ComponentGlyph
-from sfnttools.tables.glyf.simple import SimpleGlyph
+from sfnttools.tables.glyf.component import XyGlyphComponent, PointsGlyphComponent, ComponentGlyph
+from sfnttools.tables.glyf.simple import GlyphCoordinate, SimpleGlyph
 from sfnttools.tables.loca import LocaTable
 from sfnttools.utils.stream import Stream
 
