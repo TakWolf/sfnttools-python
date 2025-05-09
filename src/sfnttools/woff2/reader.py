@@ -38,7 +38,7 @@ class Woff2Reader(SfntReader):
     header: Woff2Header
     font_entry: Woff2CollectionFontEntry
     table_directory_entries_map: dict[str, Woff2TableDirectoryEntry]
-    collection_tables_cache: dict[int, tuple[SfntTable, int]] | None
+    collection_tables_cache: dict[tuple[str, int], tuple[SfntTable, int]] | None
 
     def __init__(
             self,
@@ -46,7 +46,7 @@ class Woff2Reader(SfntReader):
             uncompressed_stream: Stream,
             header: Woff2Header,
             font_entry: Woff2CollectionFontEntry,
-            collection_tables_cache: dict[int, tuple[SfntTable, int]] | None,
+            collection_tables_cache: dict[tuple[str, int], tuple[SfntTable, int]] | None,
             share_tables: bool,
             verify_checksum: bool,
     ):
@@ -96,13 +96,13 @@ class Woff2Reader(SfntReader):
     def get_table_and_checksum_from_collection_cache(self, tag: str) -> tuple[SfntTable, int] | None:
         if self.collection_tables_cache is not None:
             table_directory_entry = self.table_directory_entries_map[tag]
-            return self.collection_tables_cache.get(table_directory_entry.offset, None)
+            return self.collection_tables_cache.get((tag, table_directory_entry.offset), None)
         return None
 
     def set_table_and_checksum_to_collection_cache(self, tag: str, table: SfntTable, checksum: int):
         if self.collection_tables_cache is not None:
             table_directory_entry = self.table_directory_entries_map[tag]
-            self.collection_tables_cache[table_directory_entry.offset] = table, checksum
+            self.collection_tables_cache[(tag, table_directory_entry.offset)] = table, checksum
 
     def read_woff_payload(self) -> WoffPayload | None:
         metadata = self.header.read_metadata(self.stream)
@@ -125,8 +125,9 @@ class Woff2Reader(SfntReader):
 
         if 'glyf' in self.tables_cache and 'loca' in self.tables_cache:
             return
-        if self.collection_tables_cache is not None and glyf_directory_entry.offset in self.collection_tables_cache and loca_directory_entry.offset in self.collection_tables_cache:
-            return
+        if self.collection_tables_cache is not None:
+            if ('glyf', glyf_directory_entry.offset) in self.collection_tables_cache and ('loca', loca_directory_entry.offset) in self.collection_tables_cache:
+                return
 
         transformed_glyf_table = TransformedGlyfTable.parse(glyf_directory_entry.read_table_data(self.uncompressed_stream))
 
@@ -155,8 +156,8 @@ class Woff2Reader(SfntReader):
         self.tables_cache['glyf'] = glyf_table, glyf_checksum
         self.tables_cache['loca'] = loca_table, loca_checksum
         if self.collection_tables_cache is not None:
-            self.collection_tables_cache[glyf_directory_entry.offset] = glyf_table, glyf_checksum
-            self.collection_tables_cache[loca_directory_entry.offset] = loca_table, loca_checksum
+            self.collection_tables_cache[('glyf', glyf_directory_entry.offset)] = glyf_table, glyf_checksum
+            self.collection_tables_cache[('loca', loca_directory_entry.offset)] = loca_table, loca_checksum
 
     def get_or_parse_table(self, tag: str) -> SfntTable:
         if tag in ('glyf', 'loca'):
@@ -175,7 +176,7 @@ class Woff2CollectionReader(SfntCollectionReader):
     stream: Stream
     uncompressed_stream: Stream
     header: Woff2Header
-    collection_tables_cache: dict[int, tuple[SfntTable, int]]
+    collection_tables_cache: dict[tuple[str, int], tuple[SfntTable, int]]
     share_tables: bool
 
     def __init__(

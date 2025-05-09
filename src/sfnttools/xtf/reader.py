@@ -27,14 +27,14 @@ class XtfReader(SfntReader):
     table_directory: TableDirectory
     table_directory_offset: int
     table_records_map: dict[str, TableRecord]
-    collection_tables_cache: dict[int, tuple[SfntTable, int]] | None
+    collection_tables_cache: dict[tuple[str, int], tuple[SfntTable, int]] | None
 
     def __init__(
             self,
             stream: Stream,
             table_directory: TableDirectory,
             table_directory_offset: int,
-            collection_tables_cache: dict[int, tuple[SfntTable, int]] | None,
+            collection_tables_cache: dict[tuple[str, int], tuple[SfntTable, int]] | None,
             share_tables: bool,
             verify_checksum: bool,
     ):
@@ -69,13 +69,13 @@ class XtfReader(SfntReader):
     def get_table_and_checksum_from_collection_cache(self, tag: str) -> tuple[SfntTable, int] | None:
         if self.collection_tables_cache is not None:
             table_record = self.table_records_map[tag]
-            return self.collection_tables_cache.get(table_record.offset, None)
+            return self.collection_tables_cache.get((tag, table_record.offset), None)
         return None
 
     def set_table_and_checksum_to_collection_cache(self, tag: str, table: SfntTable, checksum: int):
         if self.collection_tables_cache is not None:
             table_record = self.table_records_map[tag]
-            self.collection_tables_cache[table_record.offset] = table, checksum
+            self.collection_tables_cache[(tag, table_record.offset)] = table, checksum
 
     def read_woff_payload(self) -> WoffPayload | None:
         return None
@@ -90,7 +90,7 @@ class XtfCollectionReader(SfntCollectionReader):
 
     stream: Stream
     header: TtcHeader
-    collection_tables_cache: dict[int, tuple[SfntTable, int]]
+    collection_tables_cache: dict[tuple[str, int], tuple[SfntTable, int]]
     share_tables: bool
     verify_checksum: bool
 
