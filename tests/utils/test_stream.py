@@ -1,5 +1,6 @@
 import pytest
 
+from sfnttools.utils.math import round_half_up
 from sfnttools.utils.stream import Stream
 
 
@@ -153,11 +154,11 @@ def test_f2dot14():
     assert stream.read_uint16() == 0x0000
     assert stream.read_uint16() == 0xFFFF
     assert stream.read_uint16() == 0x8000
-    assert round(stream.read_f2dot14(), 6) == 1.999939
+    assert round_half_up(stream.read_f2dot14(), 6) == 1.999939
     assert stream.read_f2dot14() == 1.75
-    assert round(stream.read_f2dot14(), 6) == 0.000061
+    assert round_half_up(stream.read_f2dot14(), 6) == 0.000061
     assert stream.read_f2dot14() == 0.0
-    assert round(stream.read_f2dot14(), 6) == -0.000061
+    assert round_half_up(stream.read_f2dot14(), 6) == -0.000061
     assert stream.read_f2dot14() == -2.0
     assert stream.tell() == 24
 

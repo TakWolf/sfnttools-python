@@ -2,6 +2,8 @@ import os
 from io import BytesIO, StringIO
 from typing import BinaryIO
 
+from sfnttools.utils.math import round_half_up
+
 
 class Stream:
     source: BinaryIO
@@ -137,7 +139,7 @@ class Stream:
         return self.write(value.to_bytes(4, 'big', signed=True))
 
     def write_fixed(self, value: float) -> int:
-        return self.write_int32(round(value * (2 ** 16)))
+        return self.write_int32(round_half_up(value * (2 ** 16)))
 
     def write_fword(self, value: int) -> int:
         return self.write_int16(value)
@@ -146,7 +148,7 @@ class Stream:
         return self.write_uint16(value)
 
     def write_f2dot14(self, value: float) -> int:
-        return self.write_int16(round(value * (2 ** 14)))
+        return self.write_int16(round_half_up(value * (2 ** 14)))
 
     def write_long_datetime(self, value: int) -> int:
         return self.write(value.to_bytes(8, 'big', signed=True))
