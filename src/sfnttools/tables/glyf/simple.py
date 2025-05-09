@@ -91,25 +91,25 @@ class SimpleGlyphFlags(SfntFlags):
 
 
 class GlyphCoordinate:
-    x: int
-    y: int
     on_curve_point: bool
+    delta_x: int
+    delta_y: int
 
     def __init__(
             self,
-            x: int = 0,
-            y: int = 0,
             on_curve_point: bool = True,
+            delta_x: int = 0,
+            delta_y: int = 0,
     ):
-        self.x = x
-        self.y = y
         self.on_curve_point = on_curve_point
+        self.delta_x = delta_x
+        self.delta_y = delta_y
 
     def __repr__(self) -> str:
-        return repr((self.x, self.y))
+        return repr((self.delta_x, self.delta_y))
 
     def copy(self) -> 'GlyphCoordinate':
-        return GlyphCoordinate(self.x, self.y, self.on_curve_point)
+        return GlyphCoordinate(self.on_curve_point, self.delta_x, self.delta_y)
 
 
 class SimpleGlyph:
@@ -143,30 +143,30 @@ class SimpleGlyph:
         x_coordinates = []
         for flags in flags_list:
             if flags.x_short_vector:
-                x = stream.read_uint8()
+                delta_x = stream.read_uint8()
                 if not flags.x_is_same_or_positive_x_short_vector:
-                    x *= -1
+                    delta_x *= -1
             elif flags.x_is_same_or_positive_x_short_vector:
-                x = 0
+                delta_x = 0
             else:
-                x = stream.read_int16()
-            x_coordinates.append(x)
+                delta_x = stream.read_int16()
+            x_coordinates.append(delta_x)
 
         y_coordinates = []
         for flags in flags_list:
             if flags.y_short_vector:
-                y = stream.read_uint8()
+                delta_y = stream.read_uint8()
                 if not flags.y_is_same_or_positive_y_short_vector:
-                    y *= -1
+                    delta_y *= -1
             elif flags.y_is_same_or_positive_y_short_vector:
-                y = 0
+                delta_y = 0
             else:
-                y = stream.read_int16()
-            y_coordinates.append(y)
+                delta_y = stream.read_int16()
+            y_coordinates.append(delta_y)
 
         coordinates = []
-        for flags, (x, y) in zip(flags_list, zip(x_coordinates, y_coordinates)):
-            coordinates.append(GlyphCoordinate(x, y, flags.on_curve_point))
+        for flags, (delta_x, delta_y) in zip(flags_list, zip(x_coordinates, y_coordinates)):
+            coordinates.append(GlyphCoordinate(flags.on_curve_point, delta_x, delta_y))
 
         return SimpleGlyph(
             x_min,
