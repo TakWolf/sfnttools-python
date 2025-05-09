@@ -277,6 +277,18 @@ def test_uint_base128():
     assert stream.tell() == 12
 
 
+def test_binary_string():
+    stream = Stream()
+    assert stream.write_binary_string('00000000111111110000111101010101') == 4
+    assert stream.tell() == 4
+    stream.seek(0)
+    assert stream.read_binary_string(4) == '00000000111111110000111101010101'
+    assert stream.tell() == 4
+    stream.seek(0)
+    with pytest.raises(ValueError):
+        stream.write_binary_string('0000')
+
+
 def test_align_to_4_byte():
     stream = Stream()
     stream.write(b'abc')

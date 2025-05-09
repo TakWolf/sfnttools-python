@@ -1,5 +1,5 @@
 import os
-from io import BytesIO
+from io import BytesIO, StringIO
 from typing import BinaryIO
 
 
@@ -106,6 +106,12 @@ class Stream:
                 return value
         raise ValueError('uint_base128 sequence exceeds 5 bytes')
 
+    def read_binary_string(self, size: int) -> str:
+        value = StringIO()
+        for b in self.read(size):
+            value.write(f'{b:08b}')
+        return value.getvalue()
+
     def write(self, values: bytes) -> int:
         return self.source.write(values)
 
@@ -201,6 +207,12 @@ class Stream:
                 code |= 0x80
             size += self.write_uint8(code)
         return size
+
+    def write_binary_string(self, value: str) -> int:
+        if len(value) % 8 != 0:
+            raise ValueError('the length must be a multiple of 8')
+
+        return self.write(bytes(int(value[i:i + 8], 2) for i in range(0, len(value), 8)))
 
     def write_nulls(self, size: int) -> int:
         for _ in range(size):
