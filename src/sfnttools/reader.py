@@ -3,12 +3,12 @@ from collections.abc import Iterator
 
 from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
-from sfnttools.table import SfntTableReader, SfntTable
+from sfnttools.table import SfntTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.checksum import calculate_checksum, calculate_checksum_adjustment
 
 
-class SfntReader(SfntTableReader):
+class SfntReader:
     share_tables: bool
     verify_checksum: bool
     tables_cache: dict[str, tuple[SfntTable, int]]
@@ -35,7 +35,7 @@ class SfntReader(SfntTableReader):
         raise NotImplementedError()
 
     @abstractmethod
-    def restore_header_data(self) -> bytes:
+    def reconstruct_header_data(self) -> bytes:
         raise NotImplementedError()
 
     @abstractmethod
@@ -79,7 +79,13 @@ class SfntReader(SfntTableReader):
 
             from sfnttools.tables.factory import TABLE_TYPE_REGISTRY, DEFAULT_TABLE_TYPE
             table_type = TABLE_TYPE_REGISTRY.get(tag, DEFAULT_TABLE_TYPE)
-            table = table_type.parse(data, self)
+
+            dependencies = {}
+            for dependency_tag in table_type.parse_dependencies:
+                dependency_table = self.get_or_parse_table(dependency_tag)
+                dependencies[dependency_tag] = dependency_table
+
+            table = table_type.parse(data, dependencies)
             self.tables_cache[tag] = table, checksum
             if self.is_font_collection():
                 self.set_table_and_checksum_to_collection_cache(tag, table, checksum)
@@ -95,7 +101,7 @@ class SfntReader(SfntTableReader):
             tables[tag] = table
 
         if self.verify_checksum and not self.is_font_collection() and 'head' in self.tables_cache:
-            checksums = [calculate_checksum(self.restore_header_data())]
+            checksums = [calculate_checksum(self.reconstruct_header_data())]
             for _, checksum in self.tables_cache.values():
                 checksums.append(checksum)
             checksum_adjustment = calculate_checksum_adjustment(checksums)

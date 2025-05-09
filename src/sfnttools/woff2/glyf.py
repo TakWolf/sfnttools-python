@@ -2,6 +2,7 @@ import math
 from io import BytesIO
 
 from sfnttools.flags import SfntFlags
+from sfnttools.tables.glyf import GlyfTable
 from sfnttools.tables.head import IndexToLocFormat
 from sfnttools.utils.stream import Stream
 
@@ -114,6 +115,12 @@ class TransformedGlyfTable:
         self.bbox_stream = bbox_stream
         self.instruction_stream = instruction_stream
         self.overlap_simple_bitmap = overlap_simple_bitmap
+
+    def reconstruct_glyf_tables(self) -> GlyfTable:
+
+        # TODO
+
+        return GlyfTable()
 
     def dump(self) -> bytes:
         option_flags = OptionFlags(

@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
+from sfnttools.table import SfntTable
 from sfnttools.utils.stream import Stream
 
 
@@ -47,7 +47,7 @@ class MaxpTable(SfntTable):
         )
 
     @staticmethod
-    def parse(data: bytes, reader: SfntTableReader) -> 'MaxpTable':
+    def parse(data: bytes, dependencies: dict[str, SfntTable]) -> 'MaxpTable':
         stream = Stream(data)
 
         major_version, minor_version = stream.read_version_16dot16()
@@ -161,7 +161,7 @@ class MaxpTable(SfntTable):
             self.max_component_depth,
         )
 
-    def dump(self, writer: SfntTableWriter) -> bytes:
+    def dump(self, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         buffer = BytesIO()
         stream = Stream(buffer)
 
@@ -187,4 +187,4 @@ class MaxpTable(SfntTable):
         else:
             raise SfntError(f'[maxp] unsupported table version')
 
-        return buffer.getvalue()
+        return buffer.getvalue(), {}

@@ -1,9 +1,9 @@
-from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
+from sfnttools.table import SfntTable
 
 
 class DefaultTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, reader: SfntTableReader) -> 'DefaultTable':
+    def parse(data: bytes, dependencies: dict[str, SfntTable]) -> 'DefaultTable':
         return DefaultTable(data)
 
     data: bytes
@@ -14,5 +14,5 @@ class DefaultTable(SfntTable):
     def copy(self) -> 'DefaultTable':
         return DefaultTable(self.data)
 
-    def dump(self, writer: SfntTableWriter) -> bytes:
-        return self.data
+    def dump(self, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+        return self.data, {}

@@ -42,7 +42,7 @@ class WoffReader(SfntReader):
         for table_directory_entry in self.header.table_directory_entries:
             yield table_directory_entry.tag
 
-    def restore_header_data(self) -> bytes:
+    def reconstruct_header_data(self) -> bytes:
         table_records = []
         offset = TableDirectory.calculate_bytes_size(self.header.num_tables)
         for table_directory_entry in sorted(self.header.table_directory_entries, key=lambda x: x.offset):

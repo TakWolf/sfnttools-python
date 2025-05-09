@@ -55,7 +55,7 @@ class XtfReader(SfntReader):
         for table_record in self.table_directory.table_records:
             yield table_record.tag
 
-    def restore_header_data(self) -> bytes:
+    def reconstruct_header_data(self) -> bytes:
         self.stream.seek(self.table_directory_offset)
         data = self.stream.read(TableDirectory.calculate_bytes_size(self.table_directory.num_tables))
         return data
@@ -124,7 +124,7 @@ class XtfCollectionReader(SfntCollectionReader):
 
     def read_ttc_payload(self) -> TtcPayload:
         data = self.header.read_dsig_table_data(self.stream)
-        dsig_table = None if data is None else DsigTable.parse(data)
+        dsig_table = None if data is None else DsigTable.parse(data, {})
         return TtcPayload(
             self.header.major_version,
             self.header.minor_version,

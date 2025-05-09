@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from sfnttools.error import SfntError
-from sfnttools.table import SfntTableReader, SfntTableWriter, SfntTable
+from sfnttools.table import SfntTable
 from sfnttools.tables.glyf.component import ComponentGlyph
 from sfnttools.tables.glyf.simple import SimpleGlyph
 from sfnttools.tables.loca import LocaTable
@@ -10,8 +10,8 @@ from sfnttools.utils.stream import Stream
 
 class GlyfTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, reader: SfntTableReader) -> 'GlyfTable':
-        loca_table: LocaTable = reader.get_or_parse_table('loca')
+    def parse(data: bytes, dependencies: dict[str, SfntTable]) -> 'GlyfTable':
+        loca_table: LocaTable = dependencies['loca']
 
         glyphs = []
         for i in range(len(loca_table.offsets) - 1):
@@ -34,10 +34,7 @@ class GlyfTable(SfntTable):
 
     glyphs: list[SimpleGlyph | ComponentGlyph | None]
 
-    def __init__(
-            self,
-            glyphs: list[SimpleGlyph | ComponentGlyph | None] | None = None,
-    ):
+    def __init__(self, glyphs: list[SimpleGlyph | ComponentGlyph | None] | None = None):
         self.glyphs = [] if glyphs is None else glyphs
 
     def copy(self) -> 'GlyfTable':
@@ -46,10 +43,10 @@ class GlyfTable(SfntTable):
             glyphs.append(None if glyph is None else glyph.copy())
         return GlyfTable(glyphs)
 
-    def dump(self, writer: SfntTableWriter) -> bytes:
+    def dump(self, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         buffer = BytesIO()
         stream = Stream(buffer)
 
         # TODO
 
-        return buffer.getvalue()
+        return buffer.getvalue(), {'loca': LocaTable()}

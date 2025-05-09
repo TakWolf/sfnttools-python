@@ -1,11 +1,17 @@
 from io import BytesIO
 from typing import Iterator
 
+from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
 from sfnttools.reader import SfntReader, SfntCollectionReader
 from sfnttools.table import SfntTable
+from sfnttools.tables.head import HeadTable
+from sfnttools.tables.loca import LocaTable
+from sfnttools.tables.maxp import MaxpTable
 from sfnttools.tag import SfntVersion
+from sfnttools.utils.checksum import calculate_checksum
 from sfnttools.utils.stream import Stream
+from sfnttools.woff2.glyf import TransformedGlyfTable
 from sfnttools.woff2.headers import Woff2TableDirectoryEntry, Woff2CollectionFontEntry, Woff2Header
 from sfnttools.xtf.headers import TableRecord, TableDirectory
 
@@ -62,7 +68,7 @@ class Woff2Reader(SfntReader):
         for table_directory_entry in self.header.iter_table_directory_entries(self.font_entry):
             yield table_directory_entry.tag
 
-    def restore_header_data(self) -> bytes:
+    def reconstruct_header_data(self) -> bytes:
         table_records = []
         offset = TableDirectory.calculate_bytes_size(self.header.num_tables)
         for table_directory_entry in self.header.iter_table_directory_entries(self.font_entry):
@@ -107,6 +113,56 @@ class Woff2Reader(SfntReader):
             metadata,
             private_data,
         )
+
+    def _reconstruct_glyf_and_loca_tables(self):
+        glyf_directory_entry = self.table_directory_entries_map['glyf']
+        loca_directory_entry = self.table_directory_entries_map['loca']
+
+        if glyf_directory_entry.transformed != loca_directory_entry.transformed:
+            raise SfntError("woff2 table 'glyf' and 'loca' must be transformed together")
+        if not glyf_directory_entry.transformed:
+            return
+
+        if 'glyf' in self.tables_cache and 'loca' in self.tables_cache:
+            return
+        if self.collection_tables_cache is not None and glyf_directory_entry.offset in self.collection_tables_cache and loca_directory_entry.offset in self.collection_tables_cache:
+            return
+
+        transformed_glyf_table = TransformedGlyfTable.parse(glyf_directory_entry.read_table_data(self.uncompressed_stream))
+
+        maxp_table: MaxpTable = self.get_or_parse_table('maxp')
+        if transformed_glyf_table.num_glyphs != maxp_table.num_glyphs:
+            raise SfntError("woff2 'transformed_glyf_table.num_glyphs' is inconsistent with table 'maxp'")
+
+        head_table: HeadTable = self.get_or_parse_table('head')
+        if transformed_glyf_table.index_format != head_table.index_to_loc_format:
+            raise SfntError("woff2 'transformed_glyf_table.index_format' is inconsistent with table 'head'")
+
+        glyf_table = transformed_glyf_table.reconstruct_glyf_tables()
+        glyf_table_data, generated_tables = glyf_table.dump({})
+        loca_table: LocaTable = generated_tables['loca']
+
+        if self.verify_checksum:
+            loca_table_data, _ = loca_table.dump({
+                'maxp': maxp_table,
+                'head': head_table,
+            })
+            glyf_checksum = calculate_checksum(glyf_table_data)
+            loca_checksum = calculate_checksum(loca_table_data)
+        else:
+            glyf_checksum = 0
+            loca_checksum = 0
+
+        self.tables_cache['glyf'] = glyf_table, glyf_checksum
+        self.tables_cache['loca'] = loca_table, loca_checksum
+        if self.collection_tables_cache is not None:
+            self.collection_tables_cache[glyf_directory_entry.offset] = glyf_table, glyf_checksum
+            self.collection_tables_cache[loca_directory_entry.offset] = loca_table, loca_checksum
+
+    def get_or_parse_table(self, tag: str) -> SfntTable:
+        if tag in ('glyf', 'loca'):
+            self._reconstruct_glyf_and_loca_tables()
+        return super().get_or_parse_table(tag)
 
 
 class Woff2CollectionReader(SfntCollectionReader):
