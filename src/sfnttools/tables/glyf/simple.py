@@ -91,6 +91,23 @@ class SimpleGlyphFlags(SfntFlags):
 
 
 class GlyphCoordinate:
+    @staticmethod
+    def calculate_bounds(coordinates: list['GlyphCoordinate']) -> tuple[int, int, int, int]:
+        xs = []
+        ys = []
+        x = 0
+        y = 0
+        for coordinate in coordinates:
+            x += coordinate.delta_x
+            y += coordinate.delta_y
+            xs.append(x)
+            ys.append(y)
+        x_min = min(xs, default=0)
+        y_min = min(ys, default=0)
+        x_max = max(xs, default=0)
+        y_max = max(ys, default=0)
+        return x_min, y_min, x_max, y_max
+
     on_curve_point: bool
     delta_x: int
     delta_y: int
@@ -114,15 +131,7 @@ class GlyphCoordinate:
 
 class SimpleGlyph:
     @staticmethod
-    def parse(data: bytes) -> 'SimpleGlyph':
-        stream = Stream(data)
-
-        num_contours = stream.read_int16()
-        x_min = stream.read_int16()
-        y_min = stream.read_int16()
-        x_max = stream.read_int16()
-        y_max = stream.read_int16()
-
+    def parse(stream: Stream, num_contours: int, x_min: int, y_min: int, x_max: int, y_max: int) -> 'SimpleGlyph':
         end_pts_of_contours = [stream.read_uint16() for _ in range(num_contours)]
         num_coordinates = end_pts_of_contours[-1] + 1
         instruction_length = stream.read_uint16()

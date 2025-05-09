@@ -23,11 +23,18 @@ class GlyfTable(SfntTable):
             if glyph_data == b'':
                 glyph = None
             else:
-                num_contours = int.from_bytes(glyph_data[0:2], 'big', signed=True)
+                stream = Stream(glyph_data)
+
+                num_contours = stream.read_int16()
+                x_min = stream.read_int16()
+                y_min = stream.read_int16()
+                x_max = stream.read_int16()
+                y_max = stream.read_int16()
+
                 if num_contours > 0:
-                    glyph = SimpleGlyph.parse(glyph_data)
+                    glyph = SimpleGlyph.parse(stream, num_contours, x_min, y_min, x_max, y_max)
                 elif num_contours < 0:
-                    glyph = ComponentGlyph.parse(glyph_data)
+                    glyph = ComponentGlyph.parse(stream, x_min, y_min, x_max, y_max)
                 else:
                     raise SfntError('[glyf] bad glyph data')
             glyphs.append(glyph)

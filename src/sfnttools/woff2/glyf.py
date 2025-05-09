@@ -1,12 +1,16 @@
 import math
 from io import BytesIO
 
+from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
-from sfnttools.tables.glyf import GlyfTable
+from sfnttools.tables.glyf import GlyfTable, GlyphCoordinate, SimpleGlyph, ComponentGlyph
 from sfnttools.tables.head import IndexToLocFormat
 from sfnttools.utils.stream import Stream
 
 _OPTION_FLAGS_MASK_HAS_OVERLAP_SIMPLE_BITMAP = 0b_0000_0000_0000_0001
+
+_TRANSFORMED_GLYF_FLAGS_MASK_ON_CURVE_POINT = 0b_1000_0000
+_TRANSFORMED_GLYF_FLAGS_MASK_OTHERS = 0b_0111_1111
 
 
 class OptionFlags(SfntFlags):
@@ -55,12 +59,12 @@ class TransformedGlyfTable:
         flag_stream = stream.read(flag_stream_size)
         glyph_stream = stream.read(glyph_stream_size)
         composite_stream = stream.read(composite_stream_size)
-        bbox_bitmap = stream.read(bbox_bitmap_size)
+        bbox_bitmap = stream.read_binary_string(bbox_bitmap_size)
         bbox_stream = stream.read(bbox_stream_size)
         instruction_stream = stream.read(instruction_stream_size)
         if option_flags.has_overlap_simple_bitmap:
             overlap_simple_bitmap_size = math.ceil(num_glyphs / 8)
-            overlap_simple_bitmap = stream.read(overlap_simple_bitmap_size)
+            overlap_simple_bitmap = stream.read_binary_string(overlap_simple_bitmap_size)
         else:
             overlap_simple_bitmap = None
 
@@ -85,10 +89,10 @@ class TransformedGlyfTable:
     flag_stream: bytes
     glyph_stream: bytes
     composite_stream: bytes
-    bbox_bitmap: bytes
+    bbox_bitmap: str
     bbox_stream: bytes
     instruction_stream: bytes
-    overlap_simple_bitmap: bytes | None
+    overlap_simple_bitmap: str | None
 
     def __init__(
             self,
@@ -99,10 +103,10 @@ class TransformedGlyfTable:
             flag_stream: bytes,
             glyph_stream: bytes,
             composite_stream: bytes,
-            bbox_bitmap: bytes,
+            bbox_bitmap: str,
             bbox_stream: bytes,
             instruction_stream: bytes,
-            overlap_simple_bitmap: bytes | None,
+            overlap_simple_bitmap: str | None,
     ):
         self.num_glyphs = num_glyphs
         self.index_format = index_format
@@ -117,10 +121,123 @@ class TransformedGlyfTable:
         self.overlap_simple_bitmap = overlap_simple_bitmap
 
     def reconstruct_glyf_tables(self) -> GlyfTable:
+        n_contour_stream = Stream(self.n_contour_stream)
+        n_points_stream = Stream(self.n_points_stream)
+        flag_stream = Stream(self.flag_stream)
+        glyph_stream = Stream(self.glyph_stream)
+        composite_stream = Stream(self.composite_stream)
+        bbox_stream = Stream(self.bbox_stream)
+        instruction_stream = Stream(self.instruction_stream)
 
-        # TODO
+        glyphs = []
+        for i in range(self.num_glyphs):
+            num_contours = n_contour_stream.read_int16()
+            if num_contours > 0:
+                end_pts_of_contours = []
+                n_points = 0
+                for _ in range(num_contours):
+                    n_points += n_points_stream.read_255uint16()
+                    end_pts_of_contours.append(n_points - 1)
 
-        return GlyfTable()
+                coordinates = []
+                for _ in range(n_points):
+                    flags = flag_stream.read_uint8()
+                    on_curve_point = flags & _TRANSFORMED_GLYF_FLAGS_MASK_ON_CURVE_POINT == 0
+                    flags = flags & _TRANSFORMED_GLYF_FLAGS_MASK_OTHERS
+
+                    if flags < 10:
+                        delta_x = 0
+                        delta_y = glyph_stream.read_uint8()
+                        delta_y += flags // 2 * 256
+                        if flags % 2 == 0:
+                            delta_y *= -1
+                    elif flags < 20:
+                        flags -= 10
+                        delta_x = glyph_stream.read_uint8()
+                        delta_x += flags // 2 * 256
+                        if flags % 2 == 0:
+                            delta_x *= -1
+                        delta_y = 0
+                    elif flags < 84:
+                        flags -= 20
+                        delta_xy = glyph_stream.read_uint8()
+                        delta_x = delta_xy >> 4
+                        delta_y = delta_xy & 0b_0000_1111
+                        delta_x += flags // 16 * 16 + 1
+                        delta_y += flags % 16 // 4 * 16 + 1
+                        if flags % 2 == 0:
+                            delta_x *= -1
+                        if flags // 2 % 2 == 0:
+                            delta_y *= -1
+                    elif flags < 120:
+                        flags -= 84
+                        delta_x = glyph_stream.read_uint8()
+                        delta_y = glyph_stream.read_uint8()
+                        delta_x += flags // 12 * 256 + 1
+                        delta_y += flags % 12 // 4 * 256 + 1
+                        if flags % 2 == 0:
+                            delta_x *= -1
+                        if flags // 2 % 2 == 0:
+                            delta_y *= -1
+                    elif flags < 124:
+                        flags -= 120
+                        delta_xy = glyph_stream.read_uint24()
+                        delta_x = delta_xy >> 12
+                        delta_y = delta_xy & 0b_0000_0000_0000_1111_1111_1111
+                        if flags % 2 == 0:
+                            delta_x *= -1
+                        if flags // 2 % 2 == 0:
+                            delta_y *= -1
+                    else:
+                        flags -= 124
+                        delta_x = glyph_stream.read_uint16()
+                        delta_y = glyph_stream.read_uint16()
+                        if flags % 2 == 0:
+                            delta_x *= -1
+                        if flags // 2 % 2 == 0:
+                            delta_y *= -1
+
+                    coordinates.append(GlyphCoordinate(on_curve_point, delta_x, delta_y))
+
+                instruction_length = glyph_stream.read_255uint16()
+                instructions = instruction_stream.read(instruction_length)
+
+                if self.overlap_simple_bitmap is None:
+                    overlap_simple = False
+                else:
+                    overlap_simple = self.overlap_simple_bitmap[i] == '1'
+
+                if self.bbox_bitmap[i] == '1':
+                    x_min = bbox_stream.read_int16()
+                    y_min = bbox_stream.read_int16()
+                    x_max = bbox_stream.read_int16()
+                    y_max = bbox_stream.read_int16()
+                else:
+                    x_min, y_min, x_max, y_max = GlyphCoordinate.calculate_bounds(coordinates)
+
+                glyph = SimpleGlyph(
+                    x_min,
+                    y_min,
+                    x_max,
+                    y_max,
+                    end_pts_of_contours,
+                    coordinates,
+                    instructions,
+                    overlap_simple,
+                )
+            elif num_contours < 0:
+                if self.bbox_bitmap[i] != '1':
+                    raise SfntError("woff2 transformed component glyph must set bounds")
+                x_min = bbox_stream.read_int16()
+                y_min = bbox_stream.read_int16()
+                x_max = bbox_stream.read_int16()
+                y_max = bbox_stream.read_int16()
+                glyph = ComponentGlyph.parse(composite_stream, x_min, y_min, x_max, y_max)
+            else:
+                glyph = None
+            glyphs.append(glyph)
+
+        return GlyfTable(glyphs)
 
     def dump(self) -> bytes:
         option_flags = OptionFlags(
@@ -148,10 +265,10 @@ class TransformedGlyfTable:
         stream.write(self.flag_stream)
         stream.write(self.glyph_stream)
         stream.write(self.composite_stream)
-        stream.write(self.bbox_bitmap)
+        stream.write_binary_string(self.bbox_bitmap)
         stream.write(self.bbox_stream)
         stream.write(self.instruction_stream)
         if self.overlap_simple_bitmap is not None:
-            stream.write(self.overlap_simple_bitmap)
+            stream.write_binary_string(self.overlap_simple_bitmap)
 
         return buffer.getvalue()
