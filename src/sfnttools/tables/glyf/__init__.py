@@ -9,6 +9,8 @@ from sfnttools.utils.stream import Stream
 
 
 class GlyfTable(SfntTable):
+    parse_dependencies = ['loca']
+
     @staticmethod
     def parse(data: bytes, dependencies: dict[str, SfntTable]) -> 'GlyfTable':
         loca_table: LocaTable = dependencies['loca']

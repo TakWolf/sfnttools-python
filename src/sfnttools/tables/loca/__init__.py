@@ -8,6 +8,9 @@ from sfnttools.utils.stream import Stream
 
 
 class LocaTable(SfntTable):
+    parse_dependencies = ['maxp', 'head']
+    dump_dependencies = ['maxp', 'head']
+
     @staticmethod
     def parse(data: bytes, dependencies: dict[str, SfntTable]) -> 'LocaTable':
         maxp_table: MaxpTable = dependencies['maxp']
