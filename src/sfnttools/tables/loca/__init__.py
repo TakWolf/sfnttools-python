@@ -1,6 +1,5 @@
 from io import BytesIO
 
-from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
 from sfnttools.tables.head import HeadTable, IndexToLocFormat
 from sfnttools.tables.maxp import MaxpTable
@@ -9,7 +8,7 @@ from sfnttools.utils.stream import Stream
 
 class LocaTable(SfntTable):
     parse_dependencies = ['maxp', 'head']
-    dump_dependencies = ['maxp', 'head']
+    dump_dependencies = ['head']
 
     @staticmethod
     def parse(data: bytes, dependencies: dict[str, SfntTable]) -> 'LocaTable':
@@ -37,11 +36,13 @@ class LocaTable(SfntTable):
         return LocaTable(self.offsets.copy())
 
     def dump(self, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
-        maxp_table: MaxpTable = dependencies['maxp']
         head_table: HeadTable = dependencies['head']
 
-        if len(self.offsets) - 1 != maxp_table.num_glyphs:
-            raise SfntError('[loca] bad offsets length')
+        max_offset = max(self.offsets, default=0)
+        if max_offset <= 0xFFFF * 2 and all(offset % 2 == 0 for offset in self.offsets):
+            head_table.index_to_loc_format = IndexToLocFormat.SHORT
+        else:
+            head_table.index_to_loc_format = IndexToLocFormat.LONG
 
         buffer = BytesIO()
         stream = Stream(buffer)

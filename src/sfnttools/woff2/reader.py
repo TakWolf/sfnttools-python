@@ -143,10 +143,9 @@ class Woff2Reader(SfntReader):
         loca_table: LocaTable = generated_tables['loca']
 
         if self.verify_checksum:
-            loca_table_data, _ = loca_table.dump({
-                'maxp': maxp_table,
-                'head': head_table,
-            })
+            updated_head_table = head_table.copy()
+            loca_table_data, _ = loca_table.dump({'head': updated_head_table})
+            assert head_table.index_to_loc_format == updated_head_table.index_to_loc_format
             glyf_checksum = calculate_checksum(glyf_table_data)
             loca_checksum = calculate_checksum(loca_table_data)
         else:
