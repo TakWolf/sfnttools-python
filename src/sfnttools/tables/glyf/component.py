@@ -397,15 +397,7 @@ class ComponentGlyph:
             self.overlap_compound,
         )
 
-    def dump(self) -> bytes:
-        stream = Stream()
-
-        stream.write_int16(-1)
-        stream.write_int16(self.x_min)
-        stream.write_int16(self.y_min)
-        stream.write_int16(self.x_max)
-        stream.write_int16(self.y_max)
-
+    def dump_body(self, stream: Stream):
         for i, component in enumerate(self.components):
             flags = ComponentGlyphFlags(
                 more_components=True,
@@ -482,5 +474,16 @@ class ComponentGlyph:
         if len(self.instructions) > 0:
             stream.write_uint16(len(self.instructions))
             stream.write(self.instructions)
+
+    def dump(self) -> bytes:
+        stream = Stream()
+
+        stream.write_int16(-1)
+        stream.write_int16(self.x_min)
+        stream.write_int16(self.y_min)
+        stream.write_int16(self.x_max)
+        stream.write_int16(self.y_max)
+
+        self.dump_body(stream)
 
         return stream.get_value()

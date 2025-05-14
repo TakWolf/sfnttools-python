@@ -287,7 +287,7 @@ class SimpleGlyph:
             self.overlap_simple,
         )
 
-    def dump(self) -> bytes:
+    def dump_body(self, stream: Stream):
         if len(self.coordinates) != self.end_pts_of_contours[-1] + 1:
             raise SfntError('[glyf] bad number of coordinates')
 
@@ -338,14 +338,6 @@ class SimpleGlyph:
                 flags_stream.write_uint8(flags_value)
             last_flags_value = flags_value
 
-        stream = Stream()
-
-        stream.write_int16(self.num_contours)
-        stream.write_int16(self.x_min)
-        stream.write_int16(self.y_min)
-        stream.write_int16(self.x_max)
-        stream.write_int16(self.y_max)
-
         for index in self.end_pts_of_contours:
             stream.write_uint16(index)
         stream.write_uint16(len(self.instructions))
@@ -354,5 +346,16 @@ class SimpleGlyph:
         stream.write(flags_stream.get_value())
         stream.write(x_stream.get_value())
         stream.write(y_stream.get_value())
+
+    def dump(self) -> bytes:
+        stream = Stream()
+
+        stream.write_int16(self.num_contours)
+        stream.write_int16(self.x_min)
+        stream.write_int16(self.y_min)
+        stream.write_int16(self.x_max)
+        stream.write_int16(self.y_max)
+
+        self.dump_body(stream)
 
         return stream.get_value()
