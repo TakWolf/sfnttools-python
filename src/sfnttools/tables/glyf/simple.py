@@ -154,7 +154,14 @@ class GlyphCoordinate:
 
 class SimpleGlyph:
     @staticmethod
-    def parse(stream: Stream, num_contours: int, x_min: int, y_min: int, x_max: int, y_max: int) -> 'SimpleGlyph':
+    def parse_body(
+            stream: Stream,
+            num_contours: int,
+            x_min: int,
+            y_min: int,
+            x_max: int,
+            y_max: int,
+    ) -> 'SimpleGlyph':
         end_pts_of_contours = [stream.read_uint16() for _ in range(num_contours)]
         num_coordinates = end_pts_of_contours[-1] + 1
         instruction_length = stream.read_uint16()
@@ -210,6 +217,18 @@ class SimpleGlyph:
             instructions,
             flags_list[0].overlap_simple,
         )
+
+    @staticmethod
+    def parse(data: bytes) -> 'SimpleGlyph':
+        stream = Stream(data)
+
+        num_contours = stream.read_int16()
+        x_min = stream.read_int16()
+        y_min = stream.read_int16()
+        x_max = stream.read_int16()
+        y_max = stream.read_int16()
+
+        return SimpleGlyph.parse_body(stream, num_contours, x_min, y_min, x_max, y_max)
 
     x_min: int
     y_min: int

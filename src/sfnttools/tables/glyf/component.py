@@ -248,7 +248,13 @@ class PointsGlyphComponent:
 
 class ComponentGlyph:
     @staticmethod
-    def parse(stream: Stream, x_min: int, y_min: int, x_max: int, y_max: int) -> 'ComponentGlyph':
+    def parse_body(
+            stream: Stream,
+            x_min: int,
+            y_min: int,
+            x_max: int,
+            y_max: int,
+    ) -> 'ComponentGlyph':
         components = []
         overlap_compound = None
         we_have_instructions = False
@@ -330,6 +336,18 @@ class ComponentGlyph:
             instructions,
             overlap_compound,
         )
+
+    @staticmethod
+    def parse(data: bytes) -> 'ComponentGlyph':
+        stream = Stream(data)
+
+        stream.read_int16()
+        x_min = stream.read_int16()
+        y_min = stream.read_int16()
+        x_max = stream.read_int16()
+        y_max = stream.read_int16()
+
+        return ComponentGlyph.parse_body(stream, x_min, y_min, x_max, y_max)
 
     x_min: int
     y_min: int

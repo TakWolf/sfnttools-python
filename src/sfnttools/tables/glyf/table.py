@@ -33,9 +33,9 @@ class GlyfTable(SfntTable):
                 y_max = stream.read_int16()
 
                 if num_contours > 0:
-                    glyph = SimpleGlyph.parse(stream, num_contours, x_min, y_min, x_max, y_max)
+                    glyph = SimpleGlyph.parse_body(stream, num_contours, x_min, y_min, x_max, y_max)
                 elif num_contours < 0:
-                    glyph = ComponentGlyph.parse(stream, x_min, y_min, x_max, y_max)
+                    glyph = ComponentGlyph.parse_body(stream, x_min, y_min, x_max, y_max)
                 else:
                     raise SfntError('[glyf] bad glyph data')
             glyphs.append(glyph)
