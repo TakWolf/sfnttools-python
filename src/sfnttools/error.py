@@ -1,0 +1,3 @@
+
+class SfntError(Exception):
+    pass
