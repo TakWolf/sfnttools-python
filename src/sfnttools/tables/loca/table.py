@@ -42,14 +42,15 @@ class LocaTable(SfntTable):
     def copy(self) -> 'LocaTable':
         return LocaTable(self.offsets.copy())
 
+    def calculate_index_to_loc_format(self) -> IndexToLocFormat:
+        if all(offset % 2 == 0 and offset <= 0xFFFF * 2 for offset in self.offsets):
+            return IndexToLocFormat.SHORT
+        else:
+            return IndexToLocFormat.LONG
+
     def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         head_table: HeadTable = dependencies['head']
-
-        max_offset = max(self.offsets, default=0)
-        if max_offset <= 0xFFFF * 2 and all(offset % 2 == 0 for offset in self.offsets):
-            head_table.index_to_loc_format = IndexToLocFormat.SHORT
-        else:
-            head_table.index_to_loc_format = IndexToLocFormat.LONG
+        head_table.index_to_loc_format = self.calculate_index_to_loc_format()
 
         stream = Stream()
 
