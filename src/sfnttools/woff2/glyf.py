@@ -121,7 +121,7 @@ class TransformedGlyfTable:
         self.instruction_stream = instruction_stream
         self.overlap_simple_bitmap = overlap_simple_bitmap
 
-    def reconstruct_glyf_tables(self) -> GlyfTable:
+    def reconstruct(self) -> GlyfTable:
         n_contour_stream = Stream(self.n_contour_stream)
         n_points_stream = Stream(self.n_points_stream)
         flag_stream = Stream(self.flag_stream)
