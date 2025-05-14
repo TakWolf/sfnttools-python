@@ -5,6 +5,12 @@ from sfnttools.font import SfntFont, SfntFontCollection
 
 
 def main():
+    g1 = SfntFont.load(assets_dir.joinpath('gulim', 'Gulim.ttf'), verify_checksum=True)
+    g2 = SfntFont.load(assets_dir.joinpath('gulim', 'GulimChe.ttf'), verify_checksum=True)
+    g3 = SfntFont.load(assets_dir.joinpath('gulim', 'Dotum.ttf'), verify_checksum=True)
+    g4 = SfntFont.load(assets_dir.joinpath('gulim', 'DotumChe.ttf'), verify_checksum=True)
+    g5 = SfntFontCollection.load(assets_dir.joinpath('gulim', 'gulim.ttc'), verify_checksum=True)
+
     s1 = SfntFont.load(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.otf'), verify_checksum=True)
     s2 = SfntFont.load(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.otf.woff2'), verify_checksum=True)
     s3 = SfntFont.load(assets_dir.joinpath('source-han-sans', 'SourceHanSansSC-VF.ttf'), verify_checksum=True)
