@@ -229,11 +229,13 @@ class TransformedGlyfTable:
             elif num_contours < 0:
                 if self.bbox_bitmap[i] != '1':
                     raise SfntError("woff2 transformed component glyph must set bounds")
+
                 x_min = bbox_stream.read_int16()
                 y_min = bbox_stream.read_int16()
                 x_max = bbox_stream.read_int16()
                 y_max = bbox_stream.read_int16()
-                glyph = ComponentGlyph.parse(composite_stream, x_min, y_min, x_max, y_max)
+
+                glyph = ComponentGlyph.parse_body(composite_stream, x_min, y_min, x_max, y_max)
             else:
                 glyph = None
             glyphs.append(glyph)

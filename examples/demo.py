@@ -1,5 +1,3 @@
-from fontTools.ttLib import TTFont
-
 from examples import assets_dir
 from sfnttools.font import SfntFont, SfntFontCollection
 
