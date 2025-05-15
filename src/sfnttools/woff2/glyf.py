@@ -94,10 +94,10 @@ class TransformedGlyfTable:
         flag_stream = Stream()
         glyph_stream = Stream()
         composite_stream = Stream()
-        bbox_bitmap = StringIO()
+        bbox_bitmap = []
         bbox_stream = Stream()
         instruction_stream = Stream()
-        overlap_simple_bitmap = StringIO()
+        overlap_simple_bitmap = []
 
         for glyph in glyf_table.glyphs:
             if isinstance(glyph, SimpleGlyph):
@@ -167,12 +167,12 @@ class TransformedGlyfTable:
                 glyph_stream.write_255uint16(len(glyph.instructions))
                 instruction_stream.write(glyph.instructions)
 
-                overlap_simple_bitmap.write('1' if glyph.overlap_simple else '0')
-                bbox_bitmap.write('0')
+                overlap_simple_bitmap.append('1' if glyph.overlap_simple else '0')
+                bbox_bitmap.append('0')
             elif isinstance(glyph, ComponentGlyph):
                 n_contour_stream.write_int16(-1)
 
-                bbox_bitmap.write('1')
+                bbox_bitmap.append('1')
                 bbox_stream.write_int16(glyph.x_min)
                 bbox_stream.write_int16(glyph.y_min)
                 bbox_stream.write_int16(glyph.x_max)
@@ -183,17 +183,19 @@ class TransformedGlyfTable:
                 n_contour_stream.write_int16(0)
 
         num_glyphs = len(glyf_table.glyphs)
-        bbox_bitmap_size = math.ceil(num_glyphs / 32) * 4
-        overlap_simple_bitmap_size = math.ceil(num_glyphs / 8)
 
-        while bbox_bitmap.tell() < bbox_bitmap_size:
-            bbox_bitmap.write('0')
-        bbox_bitmap = bbox_bitmap.getvalue()
+        bbox_bitmap_length = math.ceil(num_glyphs / 32) * 4 * 8
+        while len(bbox_bitmap) < bbox_bitmap_length:
+            bbox_bitmap.append('0')
+        bbox_bitmap = ''.join(bbox_bitmap)
 
-        while overlap_simple_bitmap.tell() < overlap_simple_bitmap_size:
-            overlap_simple_bitmap.write('0')
-        overlap_simple_bitmap = overlap_simple_bitmap.getvalue()
-        if '1' not in overlap_simple_bitmap:
+        if '1' in overlap_simple_bitmap:
+            overlap_simple_bitmap_length = math.ceil(num_glyphs / 8) * 8
+            while len(overlap_simple_bitmap) < overlap_simple_bitmap_length:
+                overlap_simple_bitmap.append('0')
+            overlap_simple_bitmap = ''.join(overlap_simple_bitmap)
+
+        else:
             overlap_simple_bitmap = None
 
         return TransformedGlyfTable(
