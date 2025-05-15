@@ -158,7 +158,7 @@ class TransformedGlyfTable:
                             flags += 1
                         flags += 124
 
-                    if coordinate.on_curve_point:
+                    if not coordinate.on_curve_point:
                         flags |= _TRANSFORMED_GLYF_FLAGS_MASK_ON_CURVE_POINT
 
                     flag_stream.write_uint8(flags)
