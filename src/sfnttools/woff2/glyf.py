@@ -388,7 +388,7 @@ class TransformedGlyfTable:
         stream.write_uint32(len(self.flag_stream))
         stream.write_uint32(len(self.glyph_stream))
         stream.write_uint32(len(self.composite_stream))
-        stream.write_uint32(len(self.bbox_bitmap) + len(self.bbox_stream))
+        stream.write_uint32(len(self.bbox_bitmap) // 8 + len(self.bbox_stream))
         stream.write_uint32(len(self.instruction_stream))
 
         stream.write(self.n_contour_stream)
