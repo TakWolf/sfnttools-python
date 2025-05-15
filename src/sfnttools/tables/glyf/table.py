@@ -73,8 +73,3 @@ class GlyfTable(SfntTable):
         offsets.append(stream.tell())
 
         return stream.get_value(), {'loca': LocaTable(offsets)}
-
-    def calculate_loca_table(self, configs: SfntConfigs) -> LocaTable:
-        _, generated_tables = self.dump(configs, {})
-        loca_table: LocaTable = generated_tables['loca']
-        return loca_table
