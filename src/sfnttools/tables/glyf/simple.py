@@ -275,6 +275,9 @@ class SimpleGlyph:
     def num_contours(self) -> int:
         return len(self.end_pts_of_contours)
 
+    def recalculate_bounds(self):
+        self.x_min, self.y_min, self.x_max, self.y_max = GlyphCoordinate.calculate_bounds(self.coordinates)
+
     def copy(self) -> 'SimpleGlyph':
         return SimpleGlyph(
             self.x_min,
