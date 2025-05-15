@@ -52,6 +52,10 @@ class GlyfTable(SfntTable):
             return False
         return self.glyphs == other.glyphs
 
+    @property
+    def num_glyphs(self) -> int:
+        return len(self.glyphs)
+
     def copy(self) -> 'GlyfTable':
         glyphs = []
         for glyph in self.glyphs:
