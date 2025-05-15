@@ -18,7 +18,7 @@ class XtfReader(SfntReader):
         return XtfReader(stream, configs, table_directory, 0, None, False, verify_checksum)
 
     @staticmethod
-    def create_by_ttc(stream: Stream, configs: SfntConfigs, font_index: int, verify_checksum: bool) -> 'XtfReader':
+    def create_by_ttc(stream: Stream, font_index: int, configs: SfntConfigs, verify_checksum: bool) -> 'XtfReader':
         stream.seek(0)
         header = TtcHeader.parse(stream)
         table_directory, table_directory_offset = header.read_table_directory(stream, font_index)

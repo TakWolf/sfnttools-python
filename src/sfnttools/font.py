@@ -19,8 +19,8 @@ class SfntFont(UserDict[str, SfntTable]):
     @staticmethod
     def parse(
             stream: bytes | bytearray | BinaryIO,
-            configs: SfntConfigs | None = None,
             font_index: int | None = None,
+            configs: SfntConfigs | None = None,
             verify_checksum: bool = False,
     ) -> 'SfntFont':
         if isinstance(stream, (bytes, bytearray)):
@@ -35,7 +35,7 @@ class SfntFont(UserDict[str, SfntTable]):
         if tag == SfntFileTag.TTCF:
             if font_index is None:
                 raise SfntError(f'must specify a font index in font collection')
-            reader = XtfReader.create_by_ttc(stream, configs, font_index, verify_checksum)
+            reader = XtfReader.create_by_ttc(stream, font_index, configs, verify_checksum)
         elif tag == SfntFileTag.WOFF:
             reader = WoffReader.create(stream, configs, verify_checksum)
         elif tag == SfntFileTag.WOFF2:
@@ -44,7 +44,7 @@ class SfntFont(UserDict[str, SfntTable]):
             if flavor == SfntFileTag.TTCF:
                 if font_index is None:
                     raise SfntError(f'must specify a font index in font collection')
-                reader = Woff2Reader.create_by_ttc(stream, configs, font_index)
+                reader = Woff2Reader.create_by_ttc(stream, font_index, configs)
             elif flavor in [*SfntVersion]:
                 reader = Woff2Reader.create(stream, configs)
             else:
@@ -61,12 +61,12 @@ class SfntFont(UserDict[str, SfntTable]):
     @staticmethod
     def load(
             file_path: str | PathLike[str],
-            configs: SfntConfigs | None = None,
             font_index: int | None = None,
+            configs: SfntConfigs | None = None,
             verify_checksum: bool = False,
     ) -> 'SfntFont':
         with open(file_path, 'rb') as file:
-            return SfntFont.parse(file, configs, font_index, verify_checksum)
+            return SfntFont.parse(file, font_index, configs, verify_checksum)
 
     sfnt_version: SfntVersion
     woff_payload: WoffPayload | None

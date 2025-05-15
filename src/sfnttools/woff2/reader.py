@@ -23,7 +23,7 @@ class Woff2Reader(SfntReader):
         return Woff2Reader(stream, uncompressed_stream, configs, header, font_entry, None, False)
 
     @staticmethod
-    def create_by_ttc(stream: Stream, configs: SfntConfigs, font_index: int) -> 'Woff2Reader':
+    def create_by_ttc(stream: Stream, font_index: int, configs: SfntConfigs) -> 'Woff2Reader':
         stream.seek(0)
         header = Woff2Header.parse(stream)
         font_entry = header.collection_header.font_entries[font_index]
