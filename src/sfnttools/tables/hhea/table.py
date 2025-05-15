@@ -1,0 +1,135 @@
+from sfnttools.configs import SfntConfigs
+from sfnttools.table import SfntTable
+from sfnttools.tables.hhea.enum import MetricDataFormat
+from sfnttools.utils.stream import Stream
+
+
+class HheaTable(SfntTable):
+    @staticmethod
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'HheaTable':
+        stream = Stream(data)
+
+        major_version = stream.read_uint16()
+        minor_version = stream.read_uint16()
+        ascender = stream.read_fword()
+        descender = stream.read_fword()
+        line_gap = stream.read_fword()
+        advance_width_max = stream.read_ufword()
+        min_left_side_bearing = stream.read_fword()
+        min_right_side_bearing = stream.read_fword()
+        x_max_extent = stream.read_fword()
+        caret_slope_rise = stream.read_int16()
+        caret_slope_run = stream.read_int16()
+        caret_offset = stream.read_int16()
+        stream.read_int16()
+        stream.read_int16()
+        stream.read_int16()
+        stream.read_int16()
+        metric_data_format = MetricDataFormat(stream.read_int16())
+        number_of_h_metrics = stream.read_uint16()
+
+        return HheaTable(
+            major_version,
+            minor_version,
+            ascender,
+            descender,
+            line_gap,
+            advance_width_max,
+            min_left_side_bearing,
+            min_right_side_bearing,
+            x_max_extent,
+            caret_slope_rise,
+            caret_slope_run,
+            caret_offset,
+            metric_data_format,
+            number_of_h_metrics,
+        )
+
+    major_version: int
+    minor_version: int
+    ascender: int
+    descender: int
+    line_gap: int
+    advance_width_max: int
+    min_left_side_bearing: int
+    min_right_side_bearing: int
+    x_max_extent: int
+    caret_slope_rise: int
+    caret_slope_run: int
+    caret_offset: int
+    metric_data_format: MetricDataFormat
+    number_of_h_metrics: int
+
+    def __init__(
+            self,
+            major_version: int = 1,
+            minor_version: int = 0,
+            ascender: int = 0,
+            descender: int = 0,
+            line_gap: int = 0,
+            advance_width_max: int = 0,
+            min_left_side_bearing: int = 0,
+            min_right_side_bearing: int = 0,
+            x_max_extent: int = 0,
+            caret_slope_rise: int = 0,
+            caret_slope_run: int = 0,
+            caret_offset: int = 0,
+            metric_data_format: MetricDataFormat = MetricDataFormat.CURRENT,
+            number_of_h_metrics: int = 0,
+    ):
+        self.major_version = major_version
+        self.minor_version = minor_version
+        self.ascender = ascender
+        self.descender = descender
+        self.line_gap = line_gap
+        self.advance_width_max = advance_width_max
+        self.min_left_side_bearing = min_left_side_bearing
+        self.min_right_side_bearing = min_right_side_bearing
+        self.x_max_extent = x_max_extent
+        self.caret_slope_rise = caret_slope_rise
+        self.caret_slope_run = caret_slope_run
+        self.caret_offset = caret_offset
+        self.metric_data_format = metric_data_format
+        self.number_of_h_metrics = number_of_h_metrics
+
+    def copy(self) -> 'HheaTable':
+        return HheaTable(
+            self.major_version,
+            self.minor_version,
+            self.ascender,
+            self.descender,
+            self.line_gap,
+            self.advance_width_max,
+            self.min_left_side_bearing,
+            self.min_right_side_bearing,
+            self.x_max_extent,
+            self.caret_slope_rise,
+            self.caret_slope_run,
+            self.caret_offset,
+            self.metric_data_format,
+            self.number_of_h_metrics,
+        )
+
+    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+        stream = Stream()
+
+        stream.write_uint16(self.major_version)
+        stream.write_uint16(self.minor_version)
+        stream.write_fword(self.ascender)
+        stream.write_fword(self.descender)
+        stream.write_fword(self.line_gap)
+        stream.write_ufword(self.advance_width_max)
+        stream.write_fword(self.min_left_side_bearing)
+        stream.write_fword(self.min_right_side_bearing)
+        stream.write_fword(self.x_max_extent)
+        stream.write_int16(self.caret_slope_rise)
+        stream.write_int16(self.caret_slope_run)
+        stream.write_int16(self.caret_offset)
+        stream.write_int16(0)
+        stream.write_int16(0)
+        stream.write_int16(0)
+        stream.write_int16(0)
+        stream.write_int16(self.metric_data_format)
+        stream.write_uint16(self.number_of_h_metrics)
+
+        return stream.get_value(), {}
