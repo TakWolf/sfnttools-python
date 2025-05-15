@@ -1,6 +1,5 @@
 import math
 
-from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
 from sfnttools.tables.glyf.component import ComponentGlyph
@@ -85,9 +84,7 @@ class TransformedGlyfTable:
         )
 
     @staticmethod
-    def transform(configs: SfntConfigs, glyf_table: GlyfTable) -> 'TransformedGlyfTable':
-        index_format = glyf_table.calculate_loca_table(configs).calculate_index_to_loc_format()
-
+    def transform(glyf_table: GlyfTable, index_format: IndexToLocFormat) -> 'TransformedGlyfTable':
         n_contour_stream = Stream()
         n_points_stream = Stream()
         flag_stream = Stream()
