@@ -26,7 +26,7 @@ class HheaTable(SfntTable):
         stream.read_int16()
         stream.read_int16()
         metric_data_format = MetricDataFormat(stream.read_int16())
-        number_of_h_metrics = stream.read_uint16()
+        num_h_metrics = stream.read_uint16()
 
         return HheaTable(
             major_version,
@@ -42,7 +42,7 @@ class HheaTable(SfntTable):
             caret_slope_run,
             caret_offset,
             metric_data_format,
-            number_of_h_metrics,
+            num_h_metrics,
         )
 
     major_version: int
@@ -58,7 +58,7 @@ class HheaTable(SfntTable):
     caret_slope_run: int
     caret_offset: int
     metric_data_format: MetricDataFormat
-    number_of_h_metrics: int
+    num_h_metrics: int
 
     def __init__(
             self,
@@ -75,7 +75,7 @@ class HheaTable(SfntTable):
             caret_slope_run: int = 0,
             caret_offset: int = 0,
             metric_data_format: MetricDataFormat = MetricDataFormat.CURRENT,
-            number_of_h_metrics: int = 0,
+            num_h_metrics: int = 0,
     ):
         self.major_version = major_version
         self.minor_version = minor_version
@@ -90,7 +90,7 @@ class HheaTable(SfntTable):
         self.caret_slope_run = caret_slope_run
         self.caret_offset = caret_offset
         self.metric_data_format = metric_data_format
-        self.number_of_h_metrics = number_of_h_metrics
+        self.num_h_metrics = num_h_metrics
 
     def copy(self) -> 'HheaTable':
         return HheaTable(
@@ -107,7 +107,7 @@ class HheaTable(SfntTable):
             self.caret_slope_run,
             self.caret_offset,
             self.metric_data_format,
-            self.number_of_h_metrics,
+            self.num_h_metrics,
         )
 
     def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
@@ -130,6 +130,6 @@ class HheaTable(SfntTable):
         stream.write_int16(0)
         stream.write_int16(0)
         stream.write_int16(self.metric_data_format)
-        stream.write_uint16(self.number_of_h_metrics)
+        stream.write_uint16(self.num_h_metrics)
 
         return stream.get_value(), {}
