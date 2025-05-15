@@ -167,20 +167,25 @@ class TransformedGlyfTable:
                 glyph_stream.write_255uint16(len(glyph.instructions))
                 instruction_stream.write(glyph.instructions)
 
-                overlap_simple_bitmap.append('1' if glyph.overlap_simple else '0')
                 bbox_bitmap.append('0')
+                overlap_simple_bitmap.append('1' if glyph.overlap_simple else '0')
             elif isinstance(glyph, ComponentGlyph):
                 n_contour_stream.write_int16(-1)
 
-                bbox_bitmap.append('1')
                 bbox_stream.write_int16(glyph.x_min)
                 bbox_stream.write_int16(glyph.y_min)
                 bbox_stream.write_int16(glyph.x_max)
                 bbox_stream.write_int16(glyph.y_max)
 
                 glyph.dump_body(composite_stream)
+
+                bbox_bitmap.append('1')
+                overlap_simple_bitmap.append('0')
             else:
                 n_contour_stream.write_int16(0)
+
+                bbox_bitmap.append('0')
+                overlap_simple_bitmap.append('0')
 
         num_glyphs = len(glyf_table.glyphs)
 
@@ -194,7 +199,6 @@ class TransformedGlyfTable:
             while len(overlap_simple_bitmap) < overlap_simple_bitmap_length:
                 overlap_simple_bitmap.append('0')
             overlap_simple_bitmap = ''.join(overlap_simple_bitmap)
-
         else:
             overlap_simple_bitmap = None
 
