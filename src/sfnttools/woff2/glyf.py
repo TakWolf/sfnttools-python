@@ -1,5 +1,4 @@
 import math
-from io import StringIO
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
