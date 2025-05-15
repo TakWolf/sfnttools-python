@@ -1,5 +1,7 @@
 import math
+from io import StringIO
 
+from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
 from sfnttools.tables.glyf.component import ComponentGlyph
@@ -83,6 +85,131 @@ class TransformedGlyfTable:
             overlap_simple_bitmap,
         )
 
+    @staticmethod
+    def transform(configs: SfntConfigs, glyf_table: GlyfTable) -> 'TransformedGlyfTable':
+        index_format = glyf_table.calculate_loca_table(configs).calculate_index_to_loc_format()
+
+        n_contour_stream = Stream()
+        n_points_stream = Stream()
+        flag_stream = Stream()
+        glyph_stream = Stream()
+        composite_stream = Stream()
+        bbox_bitmap = StringIO()
+        bbox_stream = Stream()
+        instruction_stream = Stream()
+        overlap_simple_bitmap = StringIO()
+
+        for glyph in glyf_table.glyphs:
+            if isinstance(glyph, SimpleGlyph):
+                n_contour_stream.write_int16(glyph.num_contours)
+
+                n_point = 0
+                for end_point in glyph.end_pts_of_contours:
+                    end_point += 1
+                    n_points_stream.write_255uint16(end_point - n_point)
+                    n_point = end_point
+
+                for coordinate in glyph.coordinates:
+                    abs_delta_x = abs(coordinate.delta_x)
+                    abs_delta_y = abs(coordinate.delta_y)
+
+                    if coordinate.delta_x == 0 and abs_delta_y <= 1279:
+                        glyph_stream.write_uint8(abs_delta_y % 256)
+                        flags = abs_delta_y // 256 * 2
+                        if coordinate.delta_y >= 0:
+                            flags += 1
+                    elif coordinate.delta_y == 0 and abs_delta_x <= 1279:
+                        glyph_stream.write_uint8(abs_delta_x % 256)
+                        flags = abs_delta_x // 256 * 2
+                        if coordinate.delta_x >= 0:
+                            flags += 1
+                        flags += 10
+                    elif 1 <= abs_delta_x <= 64 and 1 <= abs_delta_y <= 64:
+                        glyph_stream.write_uint8(((abs_delta_x - 1) % 16) << 4 | (abs_delta_y - 1) % 16)
+                        flags = (abs_delta_x - 1) // 16 * 16 + (abs_delta_y - 1) // 16 * 4
+                        if coordinate.delta_y >= 0:
+                            flags += 2
+                        if coordinate.delta_x >= 0:
+                            flags += 1
+                        flags += 20
+                    elif 1 <= abs_delta_x <= 768 and 1 <= abs_delta_y <= 768:
+                        glyph_stream.write_uint8((abs_delta_x - 1) % 256)
+                        glyph_stream.write_uint8((abs_delta_y - 1) % 256)
+                        flags = (abs_delta_x - 1) // 256 * 12 + (abs_delta_y - 1) // 256 * 4
+                        if coordinate.delta_y >= 0:
+                            flags += 2
+                        if coordinate.delta_x >= 0:
+                            flags += 1
+                        flags += 84
+                    elif abs_delta_x <= 0xFFFFFFFFFFFF and abs_delta_y <= 0xFFFFFFFFFFFF:
+                        glyph_stream.write_uint24(abs_delta_x << 12 | abs_delta_y)
+                        flags = 0
+                        if coordinate.delta_y >= 0:
+                            flags += 2
+                        if coordinate.delta_x >= 0:
+                            flags += 1
+                        flags += 120
+                    else:
+                        glyph_stream.write_uint16(abs_delta_x)
+                        glyph_stream.write_uint16(abs_delta_y)
+                        flags = 0
+                        if coordinate.delta_y >= 0:
+                            flags += 2
+                        if coordinate.delta_x >= 0:
+                            flags += 1
+                        flags += 124
+
+                    if coordinate.on_curve_point:
+                        flags |= _TRANSFORMED_GLYF_FLAGS_MASK_ON_CURVE_POINT
+
+                    flag_stream.write_uint8(flags)
+
+                glyph_stream.write_255uint16(len(glyph.instructions))
+                instruction_stream.write(glyph.instructions)
+
+                overlap_simple_bitmap.write('1' if glyph.overlap_simple else '0')
+                bbox_bitmap.write('0')
+            elif isinstance(glyph, ComponentGlyph):
+                n_contour_stream.write_int16(-1)
+
+                bbox_bitmap.write('1')
+                bbox_stream.write_int16(glyph.x_min)
+                bbox_stream.write_int16(glyph.y_min)
+                bbox_stream.write_int16(glyph.x_max)
+                bbox_stream.write_int16(glyph.y_max)
+
+                glyph.dump_body(composite_stream)
+            else:
+                n_contour_stream.write_int16(0)
+
+        num_glyphs = len(glyf_table.glyphs)
+        bbox_bitmap_size = math.ceil(num_glyphs / 32) * 4
+        overlap_simple_bitmap_size = math.ceil(num_glyphs / 8)
+
+        while bbox_bitmap.tell() < bbox_bitmap_size:
+            bbox_bitmap.write('0')
+        bbox_bitmap = bbox_bitmap.getvalue()
+
+        while overlap_simple_bitmap.tell() < overlap_simple_bitmap_size:
+            overlap_simple_bitmap.write('0')
+        overlap_simple_bitmap = overlap_simple_bitmap.getvalue()
+        if '1' not in overlap_simple_bitmap:
+            overlap_simple_bitmap = None
+
+        return TransformedGlyfTable(
+            num_glyphs,
+            index_format,
+            n_contour_stream.get_value(),
+            n_points_stream.get_value(),
+            flag_stream.get_value(),
+            glyph_stream.get_value(),
+            composite_stream.get_value(),
+            bbox_bitmap,
+            bbox_stream.get_value(),
+            instruction_stream.get_value(),
+            overlap_simple_bitmap,
+        )
+
     num_glyphs: int
     index_format: IndexToLocFormat
     n_contour_stream: bytes
@@ -154,11 +281,11 @@ class TransformedGlyfTable:
                             delta_y *= -1
                     elif flags < 20:
                         flags -= 10
+                        delta_y = 0
                         delta_x = glyph_stream.read_uint8()
                         delta_x += flags // 2 * 256
                         if flags % 2 == 0:
                             delta_x *= -1
-                        delta_y = 0
                     elif flags < 84:
                         flags -= 20
                         delta_xy = glyph_stream.read_uint8()
