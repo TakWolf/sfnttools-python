@@ -5,15 +5,16 @@ from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
 from sfnttools.tables.glyf.component import ComponentGlyph
 from sfnttools.tables.glyf.simple import SimpleGlyph
-from sfnttools.tables.loca.table import LocaTable
 from sfnttools.utils.stream import Stream
 
 
 class GlyfTable(SfntTable):
     parse_dependencies = ['loca']
+    dump_generates = ['loca']
 
     @staticmethod
     def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'GlyfTable':
+        from sfnttools.tables.loca.table import LocaTable
         loca_table: LocaTable = dependencies['loca']
 
         glyphs = []
@@ -76,4 +77,5 @@ class GlyfTable(SfntTable):
                 stream.align_to_4_byte_with_nulls()
         offsets.append(stream.tell())
 
+        from sfnttools.tables.loca.table import LocaTable
         return stream.get_value(), {'loca': LocaTable(offsets)}
