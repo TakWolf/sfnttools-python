@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.table import SfntTable
 from sfnttools.tables.head.enum import IndexToLocFormat
-from sfnttools.tables.head.table import HeadTable
-from sfnttools.tables.maxp.table import MaxpTable
 from sfnttools.utils.stream import Stream
 
 
@@ -13,8 +13,10 @@ class LocaTable(SfntTable):
     dump_dependencies = ['head']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'LocaTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> LocaTable:
+        from sfnttools.tables.maxp.table import MaxpTable
         maxp_table: MaxpTable = dependencies['maxp']
+        from sfnttools.tables.head.table import HeadTable
         head_table: HeadTable = dependencies['head']
 
         stream = Stream(data)
@@ -39,8 +41,9 @@ class LocaTable(SfntTable):
             return False
         return self.offsets == other.offsets
 
-    def copy(self) -> 'LocaTable':
-        return LocaTable(self.offsets.copy())
+    @property
+    def num_offsets(self) -> int:
+        return len(self.offsets)
 
     def calculate_index_to_loc_format(self) -> IndexToLocFormat:
         if all(offset % 2 == 0 and offset <= 0xFFFF * 2 for offset in self.offsets):
@@ -48,9 +51,12 @@ class LocaTable(SfntTable):
         else:
             return IndexToLocFormat.LONG
 
+    def copy(self) -> LocaTable:
+        return LocaTable(self.offsets.copy())
+
     def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+        from sfnttools.tables.head.table import HeadTable
         head_table: HeadTable = dependencies['head']
-        head_table.index_to_loc_format = self.calculate_index_to_loc_format()
 
         stream = Stream()
 

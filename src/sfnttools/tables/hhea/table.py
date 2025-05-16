@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 from sfnttools.configs import SfntConfigs
 from sfnttools.table import SfntTable
 from sfnttools.tables.hhea.enum import MetricDataFormat
@@ -6,7 +10,7 @@ from sfnttools.utils.stream import Stream
 
 class HheaTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'HheaTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> HheaTable:
         stream = Stream(data)
 
         major_version = stream.read_uint16()
@@ -92,7 +96,25 @@ class HheaTable(SfntTable):
         self.metric_data_format = metric_data_format
         self.num_h_metrics = num_h_metrics
 
-    def copy(self) -> 'HheaTable':
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, HheaTable):
+            return False
+        return (self.major_version == other.major_version and
+                self.minor_version == other. minor_version and
+                self.ascender == other. ascender and
+                self.descender == other. descender and
+                self.line_gap == other. line_gap and
+                self.advance_width_max == other. advance_width_max and
+                self.min_left_side_bearing == other. min_left_side_bearing and
+                self.min_right_side_bearing == other. min_right_side_bearing and
+                self.x_max_extent == other. x_max_extent and
+                self.caret_slope_rise == other. caret_slope_rise and
+                self.caret_slope_run == other. caret_slope_run and
+                self.caret_offset == other. caret_offset and
+                self.metric_data_format == other. metric_data_format and
+                self.num_h_metrics == other. num_h_metrics)
+
+    def copy(self) -> HheaTable:
         return HheaTable(
             self.major_version,
             self.minor_version,

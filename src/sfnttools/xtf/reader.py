@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterator
 
 from sfnttools.configs import SfntConfigs
@@ -12,13 +14,13 @@ from sfnttools.xtf.headers import TableRecord, TableDirectory, TtcHeader
 
 class XtfReader(SfntReader):
     @staticmethod
-    def create(stream: Stream, configs: SfntConfigs, verify_checksum: bool) -> 'XtfReader':
+    def create(stream: Stream, configs: SfntConfigs, verify_checksum: bool) -> XtfReader:
         stream.seek(0)
         table_directory = TableDirectory.parse(stream)
         return XtfReader(stream, configs, table_directory, 0, None, False, verify_checksum)
 
     @staticmethod
-    def create_by_ttc(stream: Stream, font_index: int, configs: SfntConfigs, verify_checksum: bool) -> 'XtfReader':
+    def create_by_ttc(stream: Stream, font_index: int, configs: SfntConfigs, verify_checksum: bool) -> XtfReader:
         stream.seek(0)
         header = TtcHeader.parse(stream)
         table_directory, table_directory_offset = header.read_table_directory(stream, font_index)
@@ -85,7 +87,7 @@ class XtfReader(SfntReader):
 
 class XtfCollectionReader(SfntCollectionReader):
     @staticmethod
-    def create(stream: Stream, configs: SfntConfigs, share_tables: bool, verify_checksum: bool) -> 'XtfCollectionReader':
+    def create(stream: Stream, configs: SfntConfigs, share_tables: bool, verify_checksum: bool) -> XtfCollectionReader:
         stream.seek(0)
         header = TtcHeader.parse(stream)
         return XtfCollectionReader(stream, configs, header, share_tables, verify_checksum)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 
 from sfnttools.configs import SfntConfigs
@@ -11,16 +13,16 @@ class SfntTable:
 
     @staticmethod
     @abstractmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, 'SfntTable']) -> 'SfntTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> SfntTable:
         raise NotImplementedError()
 
     @abstractmethod
-    def copy(self) -> 'SfntTable':
+    def copy(self) -> SfntTable:
         raise NotImplementedError()
 
-    def update(self, configs: SfntConfigs, dependencies: dict[str, 'SfntTable']):
+    def update(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]):
         pass
 
     @abstractmethod
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, 'SfntTable']) -> tuple[bytes, dict[str, 'SfntTable']]:
+    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         raise NotImplementedError()

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from sfnttools.utils.stream import Stream
 
 
 class SignatureRecord:
     @staticmethod
-    def parse(stream: Stream) -> 'SignatureRecord':
+    def parse(stream: Stream) -> SignatureRecord:
         format = stream.read_uint32()
         length = stream.read_uint32()
         offset = stream.read_offset32()

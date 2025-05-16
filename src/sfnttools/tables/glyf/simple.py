@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from typing import Any
 
@@ -16,7 +18,7 @@ _SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE = 0b_0100_0000
 
 class SimpleGlyphFlags(SfntFlags):
     @staticmethod
-    def parse(value: int) -> 'SimpleGlyphFlags':
+    def parse(value: int) -> SimpleGlyphFlags:
         on_curve_point = value & _SIMPLE_GLYPH_FLAGS_MASK_ON_CURVE_POINT > 0
         x_short_vector = value & _SIMPLE_GLYPH_FLAGS_MASK_X_SHORT_VECTOR > 0
         y_short_vector = value & _SIMPLE_GLYPH_FLAGS_MASK_Y_SHORT_VECTOR > 0
@@ -90,7 +92,7 @@ class SimpleGlyphFlags(SfntFlags):
             value |= _SIMPLE_GLYPH_FLAGS_MASK_OVERLAP_SIMPLE
         return value
 
-    def copy(self) -> 'SimpleGlyphFlags':
+    def copy(self) -> SimpleGlyphFlags:
         return SimpleGlyphFlags(
             self.on_curve_point,
             self.x_short_vector,
@@ -102,16 +104,16 @@ class SimpleGlyphFlags(SfntFlags):
         )
 
 
-class GlyphCoordinate:
+class GlyphPoint:
     @staticmethod
-    def calculate_bounds(coordinates: list['GlyphCoordinate']) -> tuple[int, int, int, int]:
+    def calculate_bounds_box(points: list[GlyphPoint]) -> tuple[int, int, int, int]:
         xs = []
         ys = []
         x = 0
         y = 0
-        for coordinate in coordinates:
-            x += coordinate.delta_x
-            y += coordinate.delta_y
+        for point in points:
+            x += point.delta_x
+            y += point.delta_y
             xs.append(x)
             ys.append(y)
         x_min = min(xs, default=0)
@@ -120,35 +122,35 @@ class GlyphCoordinate:
         y_max = max(ys, default=0)
         return x_min, y_min, x_max, y_max
 
-    on_curve_point: bool
     delta_x: int
     delta_y: int
+    on_curve_point: bool
 
     def __init__(
             self,
-            on_curve_point: bool = True,
             delta_x: int = 0,
             delta_y: int = 0,
+            on_curve_point: bool = True,
     ):
-        self.on_curve_point = on_curve_point
         self.delta_x = delta_x
         self.delta_y = delta_y
+        self.on_curve_point = on_curve_point
 
     def __repr__(self) -> str:
         return repr((self.delta_x, self.delta_y))
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, GlyphCoordinate):
+        if not isinstance(other, GlyphPoint):
             return False
-        return (self.on_curve_point == other.on_curve_point and
-                self.delta_x == other.delta_x and
-                self.delta_y == other.delta_y)
+        return (self.delta_x == other.delta_x and
+                self.delta_y == other.delta_y and
+                self.on_curve_point == other.on_curve_point)
 
-    def copy(self) -> 'GlyphCoordinate':
-        return GlyphCoordinate(
-            self.on_curve_point,
+    def copy(self) -> GlyphPoint:
+        return GlyphPoint(
             self.delta_x,
             self.delta_y,
+            self.on_curve_point,
         )
 
 
@@ -161,14 +163,14 @@ class SimpleGlyph:
             y_min: int,
             x_max: int,
             y_max: int,
-    ) -> 'SimpleGlyph':
+    ) -> SimpleGlyph:
         end_pts_of_contours = [stream.read_uint16() for _ in range(num_contours)]
-        num_coordinates = end_pts_of_contours[-1] + 1
+        num_points = end_pts_of_contours[-1] + 1
         instruction_length = stream.read_uint16()
         instructions = stream.read(instruction_length)
 
         flags_list = []
-        while len(flags_list) < num_coordinates:
+        while len(flags_list) < num_points:
             flags = SimpleGlyphFlags.parse(stream.read_uint8())
             if flags.repeat_flag:
                 additional_repeat_times = stream.read_uint8()
@@ -176,8 +178,8 @@ class SimpleGlyph:
                 additional_repeat_times = 0
             for _ in range(additional_repeat_times + 1):
                 flags_list.append(flags)
-        if len(flags_list) != num_coordinates:
-            raise SfntError('[glyf] bad number of coordinates')
+        if len(flags_list) != num_points:
+            raise SfntError('[glyf] bad number of points')
 
         x_coordinates = []
         for flags in flags_list:
@@ -203,23 +205,23 @@ class SimpleGlyph:
                 delta_y = stream.read_int16()
             y_coordinates.append(delta_y)
 
-        coordinates = []
+        points = []
         for flags, (delta_x, delta_y) in zip(flags_list, zip(x_coordinates, y_coordinates)):
-            coordinates.append(GlyphCoordinate(flags.on_curve_point, delta_x, delta_y))
+            points.append(GlyphPoint(delta_x, delta_y, flags.on_curve_point))
 
         return SimpleGlyph(
             x_min,
             y_min,
             x_max,
             y_max,
+            points,
             end_pts_of_contours,
-            coordinates,
             instructions,
             flags_list[0].overlap_simple,
         )
 
     @staticmethod
-    def parse(data: bytes) -> 'SimpleGlyph':
+    def parse(data: bytes) -> SimpleGlyph:
         stream = Stream(data)
 
         num_contours = stream.read_int16()
@@ -234,8 +236,8 @@ class SimpleGlyph:
     y_min: int
     x_max: int
     y_max: int
+    points: list[GlyphPoint]
     end_pts_of_contours: list[int]
-    coordinates: list[GlyphCoordinate]
     instructions: bytes
     overlap_simple: bool
 
@@ -245,8 +247,8 @@ class SimpleGlyph:
             y_min: int = 0,
             x_max: int = 0,
             y_max: int = 0,
+            points: list[GlyphPoint] | None = None,
             end_pts_of_contours: list[int] | None = None,
-            coordinates: list[GlyphCoordinate] | None = None,
             instructions: bytes = b'',
             overlap_simple: bool = False,
     ):
@@ -254,8 +256,8 @@ class SimpleGlyph:
         self.y_min = y_min
         self.x_max = x_max
         self.y_max = y_max
+        self.points = [] if points is None else points
         self.end_pts_of_contours = [] if end_pts_of_contours is None else end_pts_of_contours
-        self.coordinates = [] if coordinates is None else coordinates
         self.instructions = instructions
         self.overlap_simple = overlap_simple
 
@@ -266,66 +268,71 @@ class SimpleGlyph:
                 self.y_min == other.y_min and
                 self.x_max == other.x_max and
                 self.y_max == other.y_max and
+                self.points == other.points and
                 self.end_pts_of_contours == other.end_pts_of_contours and
-                self.coordinates == other.coordinates and
                 self.instructions == other.instructions and
                 self.overlap_simple == other.overlap_simple)
+
+    @property
+    def num_points(self) -> int:
+        return len(self.points)
 
     @property
     def num_contours(self) -> int:
         return len(self.end_pts_of_contours)
 
-    def recalculate_bounds(self):
-        self.x_min, self.y_min, self.x_max, self.y_max = GlyphCoordinate.calculate_bounds(self.coordinates)
+    def recalculate_bounds_box(self):
+        self.x_min, self.y_min, self.x_max, self.y_max = GlyphPoint.calculate_bounds_box(self.points)
 
-    def copy(self) -> 'SimpleGlyph':
+    def copy(self) -> SimpleGlyph:
+        points = [point.copy() for point in self.points]
         return SimpleGlyph(
             self.x_min,
             self.y_min,
             self.x_max,
             self.y_max,
+            points,
             self.end_pts_of_contours.copy(),
-            [coordinate.copy() for coordinate in self.coordinates],
             self.instructions,
             self.overlap_simple,
         )
 
     def dump_body(self, stream: Stream):
-        if len(self.coordinates) != self.end_pts_of_contours[-1] + 1:
-            raise SfntError('[glyf] bad number of coordinates')
+        if self.num_points != self.end_pts_of_contours[-1] + 1:
+            raise SfntError('[glyf] bad number of points')
 
         flags_stream = Stream()
         x_stream = Stream()
         y_stream = Stream()
         last_flags_value = None
         additional_repeat_times = 0
-        for i, coordinate in enumerate(self.coordinates):
+        for i, point in enumerate(self.points):
             flags = SimpleGlyphFlags(
-                on_curve_point=coordinate.on_curve_point,
+                on_curve_point=point.on_curve_point,
             )
 
             if i == 0:
                 flags.overlap_simple = self.overlap_simple
 
-            if coordinate.delta_x == 0:
+            if point.delta_x == 0:
                 flags.x_is_same_or_positive_x_short_vector = True
-            elif -0xFF <= coordinate.delta_x <= 0xFF:
+            elif -0xFF <= point.delta_x <= 0xFF:
                 flags.x_short_vector = True
-                if coordinate.delta_x > 0:
+                if point.delta_x > 0:
                     flags.x_is_same_or_positive_x_short_vector = True
-                x_stream.write_uint8(abs(coordinate.delta_x))
+                x_stream.write_uint8(abs(point.delta_x))
             else:
-                x_stream.write_int16(coordinate.delta_x)
+                x_stream.write_int16(point.delta_x)
 
-            if coordinate.delta_y == 0:
+            if point.delta_y == 0:
                 flags.y_is_same_or_positive_y_short_vector = True
-            elif -0xFF <= coordinate.delta_y <= 0xFF:
+            elif -0xFF <= point.delta_y <= 0xFF:
                 flags.y_short_vector = True
-                if coordinate.delta_y > 0:
+                if point.delta_y > 0:
                     flags.y_is_same_or_positive_y_short_vector = True
-                y_stream.write_uint8(abs(coordinate.delta_y))
+                y_stream.write_uint8(abs(point.delta_y))
             else:
-                y_stream.write_int16(coordinate.delta_y)
+                y_stream.write_int16(point.delta_y)
 
             flags_value = flags.value
             if flags_value == last_flags_value and additional_repeat_times < 0xFF:

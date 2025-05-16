@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.flags import SfntFlags
@@ -7,7 +9,7 @@ _DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED = 0b_0000_0000_0000_0001
 
 class DsigPermissionFlags(SfntFlags):
     @staticmethod
-    def parse(value: int) -> 'DsigPermissionFlags':
+    def parse(value: int) -> DsigPermissionFlags:
         cannot_be_resigned = value & _DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED > 0
         return DsigPermissionFlags(cannot_be_resigned)
 
@@ -28,5 +30,5 @@ class DsigPermissionFlags(SfntFlags):
             value |= _DSIG_PERMISSION_FLAGS_MASK_CANNOT_BE_RESIGNED
         return value
 
-    def copy(self) -> 'DsigPermissionFlags':
+    def copy(self) -> DsigPermissionFlags:
         return DsigPermissionFlags(self.cannot_be_resigned)

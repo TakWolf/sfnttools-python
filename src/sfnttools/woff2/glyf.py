@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import math
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
 from sfnttools.tables.glyf.component import ComponentGlyph
-from sfnttools.tables.glyf.simple import GlyphCoordinate, SimpleGlyph
+from sfnttools.tables.glyf.simple import GlyphPoint, SimpleGlyph
 from sfnttools.tables.glyf.table import GlyfTable
 from sfnttools.tables.head.enum import IndexToLocFormat
 from sfnttools.utils.stream import Stream
@@ -16,7 +18,7 @@ _TRANSFORMED_GLYF_FLAGS_MASK_OTHERS = 0b_0111_1111
 
 class OptionFlags(SfntFlags):
     @staticmethod
-    def parse(value: int) -> 'OptionFlags':
+    def parse(value: int) -> OptionFlags:
         has_overlap_simple_bitmap = value & _OPTION_FLAGS_MASK_HAS_OVERLAP_SIMPLE_BITMAP > 0
         return OptionFlags(has_overlap_simple_bitmap)
 
@@ -32,13 +34,13 @@ class OptionFlags(SfntFlags):
             value |= _OPTION_FLAGS_MASK_HAS_OVERLAP_SIMPLE_BITMAP
         return value
 
-    def copy(self) -> 'SfntFlags':
+    def copy(self) -> OptionFlags:
         return OptionFlags(self.has_overlap_simple_bitmap)
 
 
 class TransformedGlyfTable:
     @staticmethod
-    def parse(data: bytes) -> 'TransformedGlyfTable':
+    def parse(data: bytes) -> TransformedGlyfTable:
         stream = Stream(data)
 
         stream.read_uint16()
@@ -84,7 +86,7 @@ class TransformedGlyfTable:
         )
 
     @staticmethod
-    def transform(glyf_table: GlyfTable, index_format: IndexToLocFormat) -> 'TransformedGlyfTable':
+    def transform(glyf_table: GlyfTable, index_format: IndexToLocFormat) -> TransformedGlyfTable:
         n_contour_stream = Stream()
         n_points_stream = Stream()
         flag_stream = Stream()
@@ -105,57 +107,57 @@ class TransformedGlyfTable:
                     n_points_stream.write_255uint16(end_point - n_point)
                     n_point = end_point
 
-                for coordinate in glyph.coordinates:
-                    abs_delta_x = abs(coordinate.delta_x)
-                    abs_delta_y = abs(coordinate.delta_y)
+                for point in glyph.points:
+                    abs_delta_x = abs(point.delta_x)
+                    abs_delta_y = abs(point.delta_y)
 
-                    if coordinate.delta_x == 0 and abs_delta_y <= 1279:
+                    if point.delta_x == 0 and abs_delta_y <= 1279:
                         glyph_stream.write_uint8(abs_delta_y % 256)
                         flags = abs_delta_y // 256 * 2
-                        if coordinate.delta_y >= 0:
+                        if point.delta_y >= 0:
                             flags += 1
-                    elif coordinate.delta_y == 0 and abs_delta_x <= 1279:
+                    elif point.delta_y == 0 and abs_delta_x <= 1279:
                         glyph_stream.write_uint8(abs_delta_x % 256)
                         flags = abs_delta_x // 256 * 2
-                        if coordinate.delta_x >= 0:
+                        if point.delta_x >= 0:
                             flags += 1
                         flags += 10
                     elif 1 <= abs_delta_x <= 64 and 1 <= abs_delta_y <= 64:
                         glyph_stream.write_uint8(((abs_delta_x - 1) % 16) << 4 | (abs_delta_y - 1) % 16)
                         flags = (abs_delta_x - 1) // 16 * 16 + (abs_delta_y - 1) // 16 * 4
-                        if coordinate.delta_y >= 0:
+                        if point.delta_y >= 0:
                             flags += 2
-                        if coordinate.delta_x >= 0:
+                        if point.delta_x >= 0:
                             flags += 1
                         flags += 20
                     elif 1 <= abs_delta_x <= 768 and 1 <= abs_delta_y <= 768:
                         glyph_stream.write_uint8((abs_delta_x - 1) % 256)
                         glyph_stream.write_uint8((abs_delta_y - 1) % 256)
                         flags = (abs_delta_x - 1) // 256 * 12 + (abs_delta_y - 1) // 256 * 4
-                        if coordinate.delta_y >= 0:
+                        if point.delta_y >= 0:
                             flags += 2
-                        if coordinate.delta_x >= 0:
+                        if point.delta_x >= 0:
                             flags += 1
                         flags += 84
                     elif abs_delta_x <= 0xFFFFFFFFFFFF and abs_delta_y <= 0xFFFFFFFFFFFF:
                         glyph_stream.write_uint24(abs_delta_x << 12 | abs_delta_y)
                         flags = 0
-                        if coordinate.delta_y >= 0:
+                        if point.delta_y >= 0:
                             flags += 2
-                        if coordinate.delta_x >= 0:
+                        if point.delta_x >= 0:
                             flags += 1
                         flags += 120
                     else:
                         glyph_stream.write_uint16(abs_delta_x)
                         glyph_stream.write_uint16(abs_delta_y)
                         flags = 0
-                        if coordinate.delta_y >= 0:
+                        if point.delta_y >= 0:
                             flags += 2
-                        if coordinate.delta_x >= 0:
+                        if point.delta_x >= 0:
                             flags += 1
                         flags += 124
 
-                    if not coordinate.on_curve_point:
+                    if not point.on_curve_point:
                         flags |= _TRANSFORMED_GLYF_FLAGS_MASK_ON_CURVE_POINT
 
                     flag_stream.write_uint8(flags)
@@ -269,7 +271,7 @@ class TransformedGlyfTable:
                     n_points += n_points_stream.read_255uint16()
                     end_pts_of_contours.append(n_points - 1)
 
-                coordinates = []
+                points = []
                 for _ in range(n_points):
                     flags = flag_stream.read_uint8()
                     on_curve_point = flags & _TRANSFORMED_GLYF_FLAGS_MASK_ON_CURVE_POINT == 0
@@ -327,7 +329,7 @@ class TransformedGlyfTable:
                         if flags // 2 % 2 == 0:
                             delta_y *= -1
 
-                    coordinates.append(GlyphCoordinate(on_curve_point, delta_x, delta_y))
+                    points.append(GlyphPoint(delta_x, delta_y, on_curve_point))
 
                 instruction_length = glyph_stream.read_255uint16()
                 instructions = instruction_stream.read(instruction_length)
@@ -343,15 +345,15 @@ class TransformedGlyfTable:
                     x_max = bbox_stream.read_int16()
                     y_max = bbox_stream.read_int16()
                 else:
-                    x_min, y_min, x_max, y_max = GlyphCoordinate.calculate_bounds(coordinates)
+                    x_min, y_min, x_max, y_max = GlyphPoint.calculate_bounds_box(points)
 
                 glyph = SimpleGlyph(
                     x_min,
                     y_min,
                     x_max,
                     y_max,
+                    points,
                     end_pts_of_contours,
-                    coordinates,
                     instructions,
                     overlap_simple,
                 )

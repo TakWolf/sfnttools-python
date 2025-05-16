@@ -1,14 +1,20 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
+from sfnttools.tables.glyf.component import ComponentGlyph
+from sfnttools.tables.glyf.simple import SimpleGlyph
 from sfnttools.utils.stream import Stream
 
 
 class MaxpTable(SfntTable):
+    update_dependencies = ['CFF ', 'CFF2', 'glyf']
+
     @staticmethod
-    def create_for_cff(num_glyphs: int = 0) -> 'MaxpTable':
+    def create_for_cff(num_glyphs: int = 0) -> MaxpTable:
         return MaxpTable(0, 5, num_glyphs)
 
     @staticmethod
@@ -27,7 +33,7 @@ class MaxpTable(SfntTable):
             max_size_of_instructions: int = 0,
             max_component_elements: int = 0,
             max_component_depth: int = 0,
-    ) -> 'MaxpTable':
+    ) -> MaxpTable:
         return MaxpTable(
             1,
             0,
@@ -48,7 +54,7 @@ class MaxpTable(SfntTable):
         )
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'MaxpTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> MaxpTable:
         stream = Stream(data)
 
         major_version, minor_version = stream.read_version_16dot16()
@@ -162,7 +168,7 @@ class MaxpTable(SfntTable):
                 self.max_component_elements == other. max_component_elements and
                 self.max_component_depth == other. max_component_depth)
 
-    def copy(self) -> 'MaxpTable':
+    def copy(self) -> MaxpTable:
         return MaxpTable(
             self.major_version,
             self.minor_version,
@@ -181,6 +187,50 @@ class MaxpTable(SfntTable):
             self.max_component_elements,
             self.max_component_depth,
         )
+
+    def update(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]):
+        from sfnttools.tables.cff_.table import CffTable
+        cff_table: CffTable | None = dependencies.get('CFF ', None)
+        from sfnttools.tables.cff2.table import Cff2Table
+        cff2_table: Cff2Table | None = dependencies.get('CFF2', None)
+        from sfnttools.tables.glyf.table import GlyfTable
+        glyf_table: GlyfTable | None = dependencies.get('glyf', None)
+
+        if cff_table is not None:
+            self.major_version = 0
+            self.minor_version = 5
+            self.num_glyphs = cff_table.num_glyphs
+        elif cff2_table is not None:
+            self.major_version = 0
+            self.minor_version = 5
+            self.num_glyphs = cff2_table.num_glyphs
+        elif glyf_table is not None:
+            self.major_version = 1
+            self.minor_version = 0
+            self.num_glyphs = glyf_table.num_glyphs
+
+            max_points = 0
+            max_contours = 0
+            max_composite_points = 0
+            max_composite_contours = 0
+            max_component_elements = 0
+            max_component_depth = 0
+            for glyph in glyf_table.glyphs:
+                if isinstance(glyph, SimpleGlyph):
+                    max_points = max(max_points, glyph.num_points)
+                    max_contours = max(max_contours, glyph.num_contours)
+                elif isinstance(glyph, ComponentGlyph):
+                    num_points, num_contours, max_depth = glyph.calculate_maxp_values(glyf_table.glyphs)
+                    max_composite_points = max(max_composite_points, num_points)
+                    max_composite_contours = max(max_composite_contours, num_contours)
+                    max_component_elements = max(max_component_elements, glyph.num_components)
+                    max_component_depth = max(max_component_depth, max_depth)
+            self.max_points = max_points
+            self.max_contours = max_contours
+            self.max_composite_points = max_composite_points
+            self.max_composite_contours = max_composite_contours
+            self.max_component_elements = max_component_elements
+            self.max_component_depth = max_component_depth
 
     def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()

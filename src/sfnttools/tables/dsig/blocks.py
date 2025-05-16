@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from typing import Any, Final, Protocol, runtime_checkable
 
@@ -8,7 +10,7 @@ from sfnttools.utils.stream import Stream
 class SignatureBlock(Protocol):
     @staticmethod
     @abstractmethod
-    def parse(data: bytes) -> 'SignatureBlock':
+    def parse(data: bytes) -> SignatureBlock:
         raise NotImplementedError()
 
     @property
@@ -17,7 +19,7 @@ class SignatureBlock(Protocol):
         raise NotImplementedError()
 
     @abstractmethod
-    def copy(self) -> 'SignatureBlock':
+    def copy(self) -> SignatureBlock:
         raise NotImplementedError()
 
     @abstractmethod
@@ -27,7 +29,7 @@ class SignatureBlock(Protocol):
 
 class SignatureBlockFormat1(SignatureBlock):
     @staticmethod
-    def parse(data: bytes) -> 'SignatureBlockFormat1':
+    def parse(data: bytes) -> SignatureBlockFormat1:
         stream = Stream(data)
 
         stream.read_uint16()
@@ -51,7 +53,7 @@ class SignatureBlockFormat1(SignatureBlock):
     def format(self) -> int:
         return 1
 
-    def copy(self) -> 'SignatureBlockFormat1':
+    def copy(self) -> SignatureBlockFormat1:
         return SignatureBlockFormat1(self.signature)
 
     def dump(self) -> bytes:

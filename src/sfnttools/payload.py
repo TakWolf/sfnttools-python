@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.tables.dsig.table import DsigTable
@@ -25,7 +27,7 @@ class TtcPayload:
                 self.minor_version == other.minor_version and
                 self.dsig_table == other.dsig_table)
 
-    def copy(self) -> 'TtcPayload':
+    def copy(self) -> TtcPayload:
         return TtcPayload(
             self.major_version,
             self.minor_version,
@@ -59,7 +61,7 @@ class WoffPayload:
                 self.metadata == other.metadata and
                 self.private_data == other.private_data)
 
-    def copy(self) -> 'WoffPayload':
+    def copy(self) -> WoffPayload:
         return WoffPayload(
             self.major_version,
             self.minor_version,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Iterator
 
 import brotli
@@ -75,7 +77,7 @@ _KNOWN_TABLE_TAGS = [
 
 class Woff2TableDirectoryEntryFlags:
     @staticmethod
-    def parse(stream: Stream) -> 'Woff2TableDirectoryEntryFlags':
+    def parse(stream: Stream) -> Woff2TableDirectoryEntryFlags:
         value = stream.read_uint8()
 
         tag_index = value & 0b_0011_1111
@@ -122,7 +124,7 @@ class Woff2TableDirectoryEntryFlags:
 
 class Woff2TableDirectoryEntry:
     @staticmethod
-    def parse(stream: Stream, offset: int) -> 'Woff2TableDirectoryEntry':
+    def parse(stream: Stream, offset: int) -> Woff2TableDirectoryEntry:
         flags = Woff2TableDirectoryEntryFlags.parse(stream)
         orig_length = stream.read_uint_base128()
         if flags.transformed:
@@ -179,7 +181,7 @@ class Woff2TableDirectoryEntry:
 
 class Woff2CollectionFontEntry:
     @staticmethod
-    def parse(stream: Stream) -> 'Woff2CollectionFontEntry':
+    def parse(stream: Stream) -> Woff2CollectionFontEntry:
         num_tables = stream.read_255uint16()
         sfnt_version = SfntVersion(stream.read_tag())
         indices = [stream.read_255uint16() for _ in range(num_tables)]
@@ -212,7 +214,7 @@ class Woff2CollectionFontEntry:
 
 class Woff2CollectionHeader:
     @staticmethod
-    def parse(stream: Stream) -> 'Woff2CollectionHeader':
+    def parse(stream: Stream) -> Woff2CollectionHeader:
         major_version = stream.read_uint16()
         minor_version = stream.read_uint16()
         num_fonts = stream.read_255uint16()
@@ -251,7 +253,7 @@ class Woff2CollectionHeader:
 
 class Woff2Header:
     @staticmethod
-    def parse(stream: Stream) -> 'Woff2Header':
+    def parse(stream: Stream) -> Woff2Header:
         stream.read_tag()
         flavor = stream.read_tag()
         length = stream.read_uint32()

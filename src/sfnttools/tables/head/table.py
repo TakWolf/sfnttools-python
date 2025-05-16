@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from typing import Final, Any
 
@@ -16,8 +18,10 @@ UNITS_PER_EM_MAX_VALUE: Final = 2 ** 14
 
 
 class HeadTable(SfntTable):
+    update_dependencies = ['CFF ', 'CFF2', 'glyf', 'loca']
+
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'HeadTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> HeadTable:
         stream = Stream(data)
 
         major_version = stream.read_uint16()
@@ -86,7 +90,7 @@ class HeadTable(SfntTable):
             font_revision: float = 0,
             checksum_adjustment: int = 0,
             flags: HeadTableFlags | None = None,
-            units_per_em: int = UNITS_PER_EM_MIN_VALUE,
+            units_per_em: int = 1024,
             created_seconds_since_1904: int = 0,
             modified_seconds_since_1904: int = 0,
             x_min: int = 0,
@@ -170,7 +174,7 @@ class HeadTable(SfntTable):
     def modified_datetime(self, value: datetime):
         self.modified_timestamp = int(value.timestamp())
 
-    def copy(self) -> 'HeadTable':
+    def copy(self) -> HeadTable:
         return HeadTable(
             self.major_version,
             self.minor_version,
@@ -190,6 +194,26 @@ class HeadTable(SfntTable):
             self.index_to_loc_format,
             self.glyph_data_format,
         )
+
+    def update(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]):
+        from sfnttools.tables.cff_.table import CffTable
+        cff_table: CffTable | None = dependencies.get('CFF ', None)
+        from sfnttools.tables.cff2.table import Cff2Table
+        cff2_table: Cff2Table | None = dependencies.get('CFF2', None)
+        from sfnttools.tables.glyf.table import GlyfTable
+        glyf_table: GlyfTable | None = dependencies.get('glyf', None)
+
+        if cff_table is not None:
+            self.x_min, self.y_min, self.x_max, self.y_max = cff_table.calculate_bounds_box()
+        elif cff2_table is not None:
+            self.x_min, self.y_min, self.x_max, self.y_max = cff2_table.calculate_bounds_box()
+        elif glyf_table is not None:
+            self.x_min, self.y_min, self.x_max, self.y_max = glyf_table.calculate_bounds_box()
+
+            from sfnttools.tables.loca.table import LocaTable
+            loca_table: LocaTable = dependencies['loca']
+
+            self.index_to_loc_format = loca_table.calculate_index_to_loc_format()
 
     def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()

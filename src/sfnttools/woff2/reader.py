@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterator
 
 from sfnttools.configs import SfntConfigs
@@ -5,7 +7,6 @@ from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
 from sfnttools.reader import SfntReader, SfntCollectionReader
 from sfnttools.table import SfntTable
-from sfnttools.tables.loca.table import LocaTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.stream import Stream
 from sfnttools.woff2.glyf import TransformedGlyfTable
@@ -15,7 +16,7 @@ from sfnttools.xtf.headers import TableRecord, TableDirectory
 
 class Woff2Reader(SfntReader):
     @staticmethod
-    def create(stream: Stream, configs: SfntConfigs) -> 'Woff2Reader':
+    def create(stream: Stream, configs: SfntConfigs) -> Woff2Reader:
         stream.seek(0)
         header = Woff2Header.parse(stream)
         font_entry = header.for_single_font_entry()
@@ -23,7 +24,7 @@ class Woff2Reader(SfntReader):
         return Woff2Reader(stream, uncompressed_stream, configs, header, font_entry, None, False)
 
     @staticmethod
-    def create_by_ttc(stream: Stream, font_index: int, configs: SfntConfigs) -> 'Woff2Reader':
+    def create_by_ttc(stream: Stream, font_index: int, configs: SfntConfigs) -> Woff2Reader:
         stream.seek(0)
         header = Woff2Header.parse(stream)
         font_entry = header.collection_header.font_entries[font_index]
@@ -143,7 +144,7 @@ class Woff2Reader(SfntReader):
 
 class Woff2CollectionReader(SfntCollectionReader):
     @staticmethod
-    def create(stream: Stream, configs: SfntConfigs, share_tables: bool) -> 'Woff2CollectionReader':
+    def create(stream: Stream, configs: SfntConfigs, share_tables: bool) -> Woff2CollectionReader:
         stream.seek(0)
         header = Woff2Header.parse(stream)
         uncompressed_stream = Stream(header.read_uncompressed_data(stream))

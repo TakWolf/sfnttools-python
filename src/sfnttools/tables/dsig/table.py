@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.configs import SfntConfigs
@@ -11,7 +13,7 @@ from sfnttools.utils.stream import Stream
 
 class DsigTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'DsigTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> DsigTable:
         stream = Stream(data)
 
         version = stream.read_uint32()
@@ -57,7 +59,7 @@ class DsigTable(SfntTable):
     def num_signatures(self) -> int:
         return len(self.signature_blocks)
 
-    def copy(self) -> 'DsigTable':
+    def copy(self) -> DsigTable:
         signature_blocks = [signature_block.copy() for signature_block in self.signature_blocks]
         return DsigTable(
             self.version,

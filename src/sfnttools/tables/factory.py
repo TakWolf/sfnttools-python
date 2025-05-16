@@ -1,5 +1,7 @@
 from typing import Final
 
+from sfnttools.tables.cff2.table import Cff2Table
+from sfnttools.tables.cff_.table import CffTable
 from sfnttools.tables.default import DefaultTable
 from sfnttools.tables.dsig.table import DsigTable
 from sfnttools.tables.glyf.table import GlyfTable
@@ -10,6 +12,8 @@ from sfnttools.tables.loca.table import LocaTable
 from sfnttools.tables.maxp.table import MaxpTable
 
 TABLE_TYPE_REGISTRY: Final = {
+    'CFF ': CffTable,
+    'CFF2': Cff2Table,
     'DSIG': DsigTable,
     'glyf': GlyfTable,
     'head': HeadTable,

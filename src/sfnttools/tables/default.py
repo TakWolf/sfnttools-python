@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.configs import SfntConfigs
@@ -6,7 +8,7 @@ from sfnttools.table import SfntTable
 
 class DefaultTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'DefaultTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> DefaultTable:
         return DefaultTable(data)
 
     data: bytes
@@ -19,7 +21,7 @@ class DefaultTable(SfntTable):
             return False
         return self.data == other.data
 
-    def copy(self) -> 'DefaultTable':
+    def copy(self) -> DefaultTable:
         return DefaultTable(self.data)
 
     def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:

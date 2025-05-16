@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import zlib
 
 from sfnttools.error import SfntError
@@ -7,7 +9,7 @@ from sfnttools.utils.stream import Stream
 
 class WoffTableDirectoryEntry:
     @staticmethod
-    def parse(stream: Stream) -> 'WoffTableDirectoryEntry':
+    def parse(stream: Stream) -> WoffTableDirectoryEntry:
         tag = stream.read_tag()
         offset = stream.read_uint32()
         comp_length = stream.read_uint32()
@@ -60,7 +62,7 @@ class WoffTableDirectoryEntry:
 
 class WoffHeader:
     @staticmethod
-    def parse(stream: Stream) -> 'WoffHeader':
+    def parse(stream: Stream) -> WoffHeader:
         stream.read_tag()
         sfnt_version = SfntVersion(stream.read_tag())
         length = stream.read_uint32()

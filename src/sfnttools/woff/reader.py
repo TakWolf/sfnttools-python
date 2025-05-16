@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterator
 
 from sfnttools.configs import SfntConfigs
@@ -12,7 +14,7 @@ from sfnttools.xtf.headers import TableRecord, TableDirectory
 
 class WoffReader(SfntReader):
     @staticmethod
-    def create(stream: Stream, configs: SfntConfigs, verify_checksum: bool) -> 'WoffReader':
+    def create(stream: Stream, configs: SfntConfigs, verify_checksum: bool) -> WoffReader:
         stream.seek(0)
         header = WoffHeader.parse(stream)
         return WoffReader(stream, configs, header, verify_checksum)

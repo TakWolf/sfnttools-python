@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 
 from sfnttools.error import SfntError
@@ -7,7 +9,7 @@ from sfnttools.utils.stream import Stream
 
 class TableRecord:
     @staticmethod
-    def parse(stream: Stream) -> 'TableRecord':
+    def parse(stream: Stream) -> TableRecord:
         tag = stream.read_tag()
         checksum = stream.read_uint32()
         offset = stream.read_offset32()
@@ -54,7 +56,7 @@ class TableDirectory:
         return 4 + 2 + 2 + 2 + 2 + (4 + 4 + 4 + 4) * num_tables
 
     @staticmethod
-    def create(sfnt_version: SfntVersion, table_records: list[TableRecord]) -> 'TableDirectory':
+    def create(sfnt_version: SfntVersion, table_records: list[TableRecord]) -> TableDirectory:
         num_tables = len(table_records)
         entry_selector = math.floor(math.log2(num_tables))
         search_range = 2 ** entry_selector * 16
@@ -62,7 +64,7 @@ class TableDirectory:
         return TableDirectory(sfnt_version, search_range, entry_selector, range_shift, table_records)
 
     @staticmethod
-    def parse(stream: Stream) -> 'TableDirectory':
+    def parse(stream: Stream) -> TableDirectory:
         sfnt_version = SfntVersion(stream.read_tag())
         num_tables = stream.read_uint16()
         search_range = stream.read_uint16()
@@ -113,7 +115,7 @@ class TableDirectory:
 
 class TtcHeader:
     @staticmethod
-    def parse(stream: Stream) -> 'TtcHeader':
+    def parse(stream: Stream) -> TtcHeader:
         stream.read_tag()
         major_version = stream.read_uint16()
         minor_version = stream.read_uint16()

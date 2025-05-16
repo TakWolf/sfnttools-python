@@ -3,7 +3,7 @@ from sfnttools.font import SfntFont, SfntFontCollection
 
 
 def main():
-    g1 = SfntFont.load(assets_dir.joinpath('gulim', 'Gulim.ttf'), verify_checksum=True)
+    # g1 = SfntFont.load(assets_dir.joinpath('gulim', 'Gulim.ttf'), verify_checksum=True)
     g2 = SfntFont.load(assets_dir.joinpath('gulim', 'Gulim.woff2'), verify_checksum=True)
     g3 = SfntFont.load(assets_dir.joinpath('gulim', 'GulimChe.ttf'), verify_checksum=True)
     g4 = SfntFont.load(assets_dir.joinpath('gulim', 'GulimChe.woff2'), verify_checksum=True)

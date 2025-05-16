@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.flags import SfntFlags
@@ -23,7 +25,7 @@ _MAC_STYLE_MASK_EXTENDED = 0b_0000_0000_0100_0000
 
 class HeadTableFlags(SfntFlags):
     @staticmethod
-    def parse(value: int) -> 'HeadTableFlags':
+    def parse(value: int) -> HeadTableFlags:
         baseline_at_y0 = value & _HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 > 0
         left_sidebearing_at_x0 = value & _HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 > 0
         instructions_may_depend_on_point_size = value & _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE > 0
@@ -113,7 +115,7 @@ class HeadTableFlags(SfntFlags):
             value |= _HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT
         return value
 
-    def copy(self) -> 'HeadTableFlags':
+    def copy(self) -> HeadTableFlags:
         return HeadTableFlags(
             self.baseline_at_y0,
             self.left_sidebearing_at_x0,
@@ -129,7 +131,7 @@ class HeadTableFlags(SfntFlags):
 
 class MacStyle(SfntFlags):
     @staticmethod
-    def parse(value: int) -> 'MacStyle':
+    def parse(value: int) -> MacStyle:
         bold = value & _MAC_STYLE_MASK_BOLD > 0
         italic = value & _MAC_STYLE_MASK_ITALIC > 0
         underline = value & _MAC_STYLE_MASK_UNDERLINE > 0
@@ -203,7 +205,7 @@ class MacStyle(SfntFlags):
             value |= _MAC_STYLE_MASK_EXTENDED
         return value
 
-    def copy(self) -> 'MacStyle':
+    def copy(self) -> MacStyle:
         return MacStyle(
             self.bold,
             self.italic,

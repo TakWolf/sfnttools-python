@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from sfnttools.configs import GlyfDataOffsetsPaddingMode, SfntConfigs
@@ -13,7 +15,7 @@ class GlyfTable(SfntTable):
     dump_generates = ['loca']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> 'GlyfTable':
+    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> GlyfTable:
         from sfnttools.tables.loca.table import LocaTable
         loca_table: LocaTable = dependencies['loca']
 
@@ -57,7 +59,48 @@ class GlyfTable(SfntTable):
     def num_glyphs(self) -> int:
         return len(self.glyphs)
 
-    def copy(self) -> 'GlyfTable':
+    def calculate_bounds_box(self) -> tuple[int, int, int, int]:
+        x_min = None
+        y_min = None
+        x_max = None
+        y_max = None
+
+        for glyph in self.glyphs:
+            if glyph is None:
+                continue
+
+            if x_min is None:
+                x_min = glyph.x_min
+            else:
+                x_min = min(x_min, glyph.x_min)
+
+            if y_min is None:
+                y_min = glyph.y_min
+            else:
+                y_min = min(y_min, glyph.y_min)
+
+            if x_max is None:
+                x_max = glyph.x_max
+            else:
+                x_max = max(x_max, glyph.x_max)
+
+            if y_max is None:
+                y_max = glyph.y_max
+            else:
+                y_max = max(y_max, glyph.y_max)
+
+        if x_min is None:
+            x_min = 0
+        if y_min is None:
+            y_min = 0
+        if x_max is None:
+            x_max = 0
+        if y_max is None:
+            y_max = 0
+
+        return x_min, y_min, x_max, y_max
+
+    def copy(self) -> GlyfTable:
         glyphs = []
         for glyph in self.glyphs:
             glyphs.append(None if glyph is None else glyph.copy())

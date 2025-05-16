@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 
 
 class SfntFlags:
     @staticmethod
     @abstractmethod
-    def parse(value: int) -> 'SfntFlags':
+    def parse(value: int) -> SfntFlags:
         raise NotImplementedError()
 
     def __repr__(self) -> str:
@@ -16,5 +18,5 @@ class SfntFlags:
         raise NotImplementedError()
 
     @abstractmethod
-    def copy(self) -> 'SfntFlags':
+    def copy(self) -> SfntFlags:
         raise NotImplementedError()

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import UserDict, UserList
 from io import BytesIO
 from os import PathLike
@@ -22,7 +24,7 @@ class SfntFont(UserDict[str, SfntTable]):
             font_index: int | None = None,
             configs: SfntConfigs | None = None,
             verify_checksum: bool = False,
-    ) -> 'SfntFont':
+    ) -> SfntFont:
         if isinstance(stream, (bytes, bytearray)):
             stream = BytesIO(stream)
         stream = Stream(stream)
@@ -64,7 +66,7 @@ class SfntFont(UserDict[str, SfntTable]):
             font_index: int | None = None,
             configs: SfntConfigs | None = None,
             verify_checksum: bool = False,
-    ) -> 'SfntFont':
+    ) -> SfntFont:
         with open(file_path, 'rb') as file:
             return SfntFont.parse(file, font_index, configs, verify_checksum)
 
@@ -113,7 +115,7 @@ class SfntFont(UserDict[str, SfntTable]):
                 self.woff_payload == other.woff_payload and
                 super().__eq__(other))
 
-    def copy(self) -> 'SfntFont':
+    def copy(self) -> SfntFont:
         tables = {tag: table.copy() for tag, table in self.items()}
         return SfntFont(
             self.sfnt_version,
@@ -129,7 +131,7 @@ class SfntFontCollection(UserList[SfntFont]):
             configs: SfntConfigs | None = None,
             share_tables: bool = True,
             verify_checksum: bool = False,
-    ) -> 'SfntFontCollection':
+    ) -> SfntFontCollection:
         if isinstance(stream, (bytes, bytearray)):
             stream = BytesIO(stream)
         stream = Stream(stream)
@@ -164,7 +166,7 @@ class SfntFontCollection(UserList[SfntFont]):
             configs: SfntConfigs | None = None,
             share_tables: bool = True,
             verify_checksum: bool = False,
-    ) -> 'SfntFontCollection':
+    ) -> SfntFontCollection:
         with open(file_path, 'rb') as file:
             return SfntFontCollection.parse(file, configs, share_tables, verify_checksum)
 
@@ -191,7 +193,7 @@ class SfntFontCollection(UserList[SfntFont]):
                 self.woff_payload == other.woff_payload and
                 super().__eq__(other))
 
-    def copy(self) -> 'SfntFontCollection':
+    def copy(self) -> SfntFontCollection:
         fonts = [font.copy() for font in self]
         return SfntFontCollection(
             fonts,
