@@ -129,7 +129,7 @@ class Woff2Reader(SfntReader):
 
         transformed_glyf_table = TransformedGlyfTable.parse(glyf_directory_entry.read_table_data(self.uncompressed_stream))
         glyf_table = transformed_glyf_table.reconstruct()
-        loca_table = glyf_table.dump(self.configs, {})[1]['loca']
+        loca_table = glyf_table.dump_with_loca_table(self.configs)[1]
         self.tables_cache['glyf'] = glyf_table, 0
         self.tables_cache['loca'] = loca_table, 0
         if self.collection_tables_cache is not None:
