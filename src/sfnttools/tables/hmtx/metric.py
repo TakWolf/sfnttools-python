@@ -5,12 +5,12 @@ from typing import Any
 from sfnttools.utils.stream import Stream
 
 
-class LongHorMetric:
+class LongHoriMetric:
     @staticmethod
-    def parse(stream: Stream) -> LongHorMetric:
+    def parse(stream: Stream) -> LongHoriMetric:
         advance_width = stream.read_ufword()
         left_side_bearing = stream.read_fword()
-        return LongHorMetric(
+        return LongHoriMetric(
             advance_width,
             left_side_bearing,
         )
@@ -27,13 +27,13 @@ class LongHorMetric:
         self.left_side_bearing = left_side_bearing
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, LongHorMetric):
+        if not isinstance(other, LongHoriMetric):
             return False
         return (self.advance_width == other.advance_width and
                 self.left_side_bearing == other.left_side_bearing)
 
-    def copy(self) -> LongHorMetric:
-        return LongHorMetric(
+    def copy(self) -> LongHoriMetric:
+        return LongHoriMetric(
             self.advance_width,
             self.left_side_bearing,
         )

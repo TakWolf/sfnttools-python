@@ -4,7 +4,6 @@ from typing import Any
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.table import SfntTable
-from sfnttools.tables.hmtx.metric import LongHorMetric
 from sfnttools.utils.stream import Stream
 
 
