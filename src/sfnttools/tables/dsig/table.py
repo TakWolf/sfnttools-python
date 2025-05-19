@@ -67,7 +67,7 @@ class DsigTable(SfntTable):
             signature_blocks,
         )
 
-    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         stream = Stream()
 
         stream.seek(4 + 2 + 2 + (4 + 4 + 4) * self.num_signatures)
@@ -88,4 +88,4 @@ class DsigTable(SfntTable):
         for signature_record in signature_records:
             signature_record.dump(stream)
 
-        return stream.get_value(), {}
+        return stream.get_value()
