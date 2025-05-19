@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Final, Any
+from typing import Any, Final
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError

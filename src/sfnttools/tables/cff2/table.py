@@ -35,6 +35,6 @@ class Cff2Table(SfntTable):
         # TODO
         return Cff2Table(self.data)
 
-    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         # TODO
-        return self.data, {}
+        return self.data
