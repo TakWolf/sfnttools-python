@@ -16,7 +16,7 @@ class GlyfTable(SfntTable):
     dump_generates = ['loca']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> GlyfTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> GlyfTable:
         loca_table: LocaTable = dependencies['loca']
 
         glyphs = []
@@ -122,6 +122,6 @@ class GlyfTable(SfntTable):
 
         return stream.get_value(), LocaTable(offsets)
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         data, loca_table = self.dump_with_loca_table(configs)
         return data, {'loca': loca_table}

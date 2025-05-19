@@ -10,7 +10,7 @@ from sfnttools.utils.stream import Stream
 
 class HheaTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> HheaTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> HheaTable:
         stream = Stream(data)
 
         major_version = stream.read_uint16()
@@ -132,7 +132,7 @@ class HheaTable(SfntTable):
             self.num_h_metrics,
         )
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()
 
         stream.write_uint16(self.major_version)

@@ -11,7 +11,7 @@ class HmtxTable(SfntTable):
     parse_dependencies = ['hhea', 'maxp']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> HmtxTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> HmtxTable:
         from sfnttools.tables.hhea.table import HheaTable
         hhea_table: HheaTable = dependencies['hhea']
         from sfnttools.tables.maxp.table import MaxpTable
@@ -65,7 +65,7 @@ class HmtxTable(SfntTable):
             self.left_side_bearings.copy(),
         )
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()
 
         for metrics in self.h_metrics:

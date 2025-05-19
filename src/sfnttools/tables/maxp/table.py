@@ -54,7 +54,7 @@ class MaxpTable(SfntTable):
         )
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> MaxpTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> MaxpTable:
         stream = Stream(data)
 
         major_version, minor_version = stream.read_version_16dot16()
@@ -188,7 +188,7 @@ class MaxpTable(SfntTable):
             self.max_component_depth,
         )
 
-    def update(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]):
+    def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
         from sfnttools.tables.cff_.table import CffTable
         cff_table: CffTable | None = dependencies.get('CFF ', None)
         from sfnttools.tables.cff2.table import Cff2Table
@@ -232,7 +232,7 @@ class MaxpTable(SfntTable):
             self.max_component_elements = max_component_elements
             self.max_component_depth = max_component_depth
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()
 
         stream.write_version_16dot16((self.major_version, self.minor_version))

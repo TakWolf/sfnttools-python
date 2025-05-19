@@ -8,7 +8,7 @@ class VmtxTable(SfntTable):
     parse_dependencies = ['vhea', 'maxp']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> VmtxTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> VmtxTable:
         pass
 
 
@@ -17,5 +17,5 @@ class VmtxTable(SfntTable):
     def copy(self) -> SfntTable:
         pass
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         pass

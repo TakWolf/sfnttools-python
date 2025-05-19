@@ -21,7 +21,7 @@ class HeadTable(SfntTable):
     update_dependencies = ['CFF ', 'CFF2', 'glyf', 'loca']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> HeadTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> HeadTable:
         stream = Stream(data)
 
         major_version = stream.read_uint16()
@@ -195,7 +195,7 @@ class HeadTable(SfntTable):
             self.glyph_data_format,
         )
 
-    def update(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]):
+    def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
         from sfnttools.tables.cff_.table import CffTable
         cff_table: CffTable | None = dependencies.get('CFF ', None)
         from sfnttools.tables.cff2.table import Cff2Table
@@ -215,7 +215,7 @@ class HeadTable(SfntTable):
 
             self.index_to_loc_format = loca_table.calculate_index_to_loc_format()
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()
 
         stream.write_uint16(self.major_version)

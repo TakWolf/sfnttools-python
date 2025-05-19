@@ -8,7 +8,7 @@ from sfnttools.table import SfntTable
 
 class Cff2Table(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> Cff2Table:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> Cff2Table:
         # TODO
         return Cff2Table(data)
 
@@ -35,6 +35,6 @@ class Cff2Table(SfntTable):
         # TODO
         return Cff2Table(self.data)
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         # TODO
         return self.data, {}

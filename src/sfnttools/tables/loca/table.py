@@ -13,7 +13,7 @@ class LocaTable(SfntTable):
     dump_dependencies = ['head']
 
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> LocaTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> LocaTable:
         from sfnttools.tables.maxp.table import MaxpTable
         maxp_table: MaxpTable = dependencies['maxp']
         from sfnttools.tables.head.table import HeadTable
@@ -54,7 +54,7 @@ class LocaTable(SfntTable):
     def copy(self) -> LocaTable:
         return LocaTable(self.offsets.copy())
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         from sfnttools.tables.head.table import HeadTable
         head_table: HeadTable = dependencies['head']
 

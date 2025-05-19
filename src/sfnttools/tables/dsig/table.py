@@ -13,7 +13,7 @@ from sfnttools.utils.stream import Stream
 
 class DsigTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> DsigTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> DsigTable:
         stream = Stream(data)
 
         version = stream.read_uint32()
@@ -67,7 +67,7 @@ class DsigTable(SfntTable):
             signature_blocks,
         )
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
         stream = Stream()
 
         stream.seek(4 + 2 + 2 + (4 + 4 + 4) * self.num_signatures)
