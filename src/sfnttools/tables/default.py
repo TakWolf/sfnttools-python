@@ -8,7 +8,7 @@ from sfnttools.table import SfntTable
 
 class DefaultTable(SfntTable):
     @staticmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> DefaultTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> DefaultTable:
         return DefaultTable(data)
 
     data: bytes
@@ -24,5 +24,5 @@ class DefaultTable(SfntTable):
     def copy(self) -> DefaultTable:
         return DefaultTable(self.data)
 
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
-        return self.data, {}
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
+        return self.data
