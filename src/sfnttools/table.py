@@ -7,22 +7,20 @@ from sfnttools.configs import SfntConfigs
 
 class SfntTable:
     parse_dependencies: list[str] = []
-    update_dependencies: list[str] = []
-    dump_dependencies: list[str] = []
-    dump_generates: list[str] = []
+    updated: bool = False
 
     @staticmethod
     @abstractmethod
-    def parse(data: bytes, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> SfntTable:
+    def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> SfntTable:
         raise NotImplementedError()
 
     @abstractmethod
     def copy(self) -> SfntTable:
         raise NotImplementedError()
 
-    def update(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]):
+    def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
         pass
 
     @abstractmethod
-    def dump(self, configs: SfntConfigs, dependencies: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         raise NotImplementedError()

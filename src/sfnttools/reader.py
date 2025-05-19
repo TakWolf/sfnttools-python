@@ -84,12 +84,12 @@ class SfntReader:
             from sfnttools.tables.factory import TABLE_TYPE_REGISTRY, DEFAULT_TABLE_TYPE
             table_type = TABLE_TYPE_REGISTRY.get(tag, DEFAULT_TABLE_TYPE)
 
-            dependencies = {}
+            dependency_tables = {}
             for dependency_tag in table_type.parse_dependencies:
                 dependency_table = self.get_or_parse_table(dependency_tag)
-                dependencies[dependency_tag] = dependency_table
+                dependency_tables[dependency_tag] = dependency_table
 
-            table = table_type.parse(data, self.configs, dependencies)
+            table = table_type.parse(data, self.configs, dependency_tables)
             self.tables_cache[tag] = table, checksum
             if self.is_font_collection():
                 self.set_table_and_checksum_to_collection_cache(tag, table, checksum)
