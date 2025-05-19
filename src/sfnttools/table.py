@@ -7,7 +7,7 @@ from sfnttools.configs import SfntConfigs
 
 class SfntTable:
     parse_dependencies: list[str] = []
-    updated: bool = False
+    update_before_dump: bool = False
 
     @staticmethod
     @abstractmethod
