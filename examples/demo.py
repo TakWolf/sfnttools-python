@@ -3,6 +3,11 @@ from sfnttools.font import SfntFont, SfntFontCollection
 
 
 def main():
+    u1 = SfntFont.load(assets_dir.joinpath('unifont', 'unifont-16.0.03.otf'), verify_checksum=True)
+    u2 = SfntFont.load(assets_dir.joinpath('unifont', 'unifont-16.0.03.otf.woff2'), verify_checksum=True)
+    u3 = SfntFont.load(assets_dir.joinpath('unifont', 'unifont-16.0.03.ttf'), verify_checksum=True)
+    u4 = SfntFont.load(assets_dir.joinpath('unifont', 'unifont-16.0.03.ttf.woff2'), verify_checksum=True)
+
     g1 = SfntFont.load(assets_dir.joinpath('gulim', 'Gulim.ttf'), verify_checksum=True)
     g2 = SfntFont.load(assets_dir.joinpath('gulim', 'Gulim.woff2'), verify_checksum=True)
     g3 = SfntFont.load(assets_dir.joinpath('gulim', 'GulimChe.ttf'), verify_checksum=True)
