@@ -4,6 +4,7 @@ from typing import Any
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
+from sfnttools.tables.glyf.simple import SimpleGlyph
 from sfnttools.utils.stream import Stream
 
 _COMPONENT_GLYPH_FLAGS_MASK_ARG_1_AND_2_ARE_WORDS = 0b_0000_0000_0000_0001
@@ -388,10 +389,6 @@ class ComponentGlyph:
                 self.instructions == other.instructions and
                 self.overlap_compound == other.overlap_compound)
 
-    @property
-    def num_components(self) -> int:
-        return len(self.components)
-
     def copy(self) -> ComponentGlyph:
         components = [component.copy() for component in self.components]
         return ComponentGlyph(
@@ -404,6 +401,27 @@ class ComponentGlyph:
             self.overlap_compound,
         )
 
+    def calculate_maxp_values(
+            self,
+            glyphs: list[SimpleGlyph | ComponentGlyph | None],
+            max_depth: int = 1,
+    ) -> tuple[int, int, int]:
+        init_depth = max_depth
+        num_points = 0
+        num_contours = 0
+        for component in self.components:
+            child_glyph = glyphs[component.glyph_index]
+            if isinstance(child_glyph, SimpleGlyph):
+                child_num_points, child_num_contours = child_glyph.calculate_maxp_values()
+                num_points += child_num_points
+                num_contours += child_num_contours
+            elif isinstance(child_glyph, ComponentGlyph):
+                child_num_points, child_num_contours, child_max_depth = child_glyph.calculate_maxp_values(glyphs, init_depth + 1)
+                num_points += child_num_points
+                num_contours += child_num_contours
+                max_depth = max(max_depth, child_max_depth)
+        return num_points, num_contours, max_depth
+
     def dump_body(self, stream: Stream):
         for i, component in enumerate(self.components):
             flags = ComponentGlyphFlags(
@@ -413,7 +431,7 @@ class ComponentGlyph:
             if i == 0:
                 flags.overlap_compound = self.overlap_compound
 
-            if i == self.num_components - 1:
+            if i == len(self.components) - 1:
                 flags.more_components = False
                 flags.we_have_instructions = len(self.instructions) > 0
 

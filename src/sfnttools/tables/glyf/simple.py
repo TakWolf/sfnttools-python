@@ -274,15 +274,8 @@ class SimpleGlyph:
                 self.overlap_simple == other.overlap_simple)
 
     @property
-    def num_points(self) -> int:
-        return len(self.points)
-
-    @property
     def num_contours(self) -> int:
         return len(self.end_pts_of_contours)
-
-    def recalculate_bounds_box(self):
-        self.x_min, self.y_min, self.x_max, self.y_max = GlyphPoint.calculate_bounds_box(self.points)
 
     def copy(self) -> SimpleGlyph:
         points = [point.copy() for point in self.points]
@@ -297,8 +290,14 @@ class SimpleGlyph:
             self.overlap_simple,
         )
 
+    def recalculate_bounds_box(self):
+        self.x_min, self.y_min, self.x_max, self.y_max = GlyphPoint.calculate_bounds_box(self.points)
+
+    def calculate_maxp_values(self) -> tuple[int, int]:
+        return len(self.points), self.num_contours
+
     def dump_body(self, stream: Stream):
-        if self.num_points != self.end_pts_of_contours[-1] + 1:
+        if len(self.points) != self.end_pts_of_contours[-1] + 1:
             raise SfntError('[glyf] bad number of points')
 
         flags_stream = Stream()

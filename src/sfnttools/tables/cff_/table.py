@@ -24,16 +24,15 @@ class CffTable(SfntTable):
 
     @property
     def num_glyphs(self) -> int:
-        # TODO
         return 0
-
-    def calculate_bounds_box(self) -> tuple[int, int, int, int]:
-        # TODO
-        return 0, 0, 0, 0
 
     def copy(self) -> CffTable:
         # TODO
         return CffTable(self.data)
+
+    def calculate_bounds_box(self) -> tuple[int, int, int, int]:
+        # TODO
+        return 0, 0, 0, 0
 
     def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         # TODO

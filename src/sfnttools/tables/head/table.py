@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Final
+from typing import Any, Final, TYPE_CHECKING
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
-from sfnttools.tables.cff2.table import Cff2Table
-from sfnttools.tables.cff_.table import CffTable
-from sfnttools.tables.glyf.table import GlyfTable
 from sfnttools.tables.head.enum import FontDirectionHint, IndexToLocFormat, GlyphDataFormat
 from sfnttools.tables.head.flags import HeadTableFlags, MacStyle
 from sfnttools.utils.stream import Stream
 from sfnttools.utils.time import seconds_since_1904_to_timestamp, timestamp_to_seconds_since_1904
+
+if TYPE_CHECKING:
+    from sfnttools.tables.cff2.table import Cff2Table
+    from sfnttools.tables.cff_.table import CffTable
+    from sfnttools.tables.glyf.table import GlyfTable
 
 _MAGIC_NUMBER = 0x5F0F3CF5
 
@@ -91,7 +93,7 @@ class HeadTable(SfntTable):
             font_revision: float = 0,
             checksum_adjustment: int = 0,
             flags: HeadTableFlags | None = None,
-            units_per_em: int = 1000,
+            units_per_em: int = 1024,
             created_seconds_since_1904: int = 0,
             modified_seconds_since_1904: int = 0,
             x_min: int = 0,

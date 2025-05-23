@@ -58,6 +58,12 @@ class GlyfTable(SfntTable):
     def num_glyphs(self) -> int:
         return len(self.glyphs)
 
+    def copy(self) -> GlyfTable:
+        glyphs = []
+        for glyph in self.glyphs:
+            glyphs.append(None if glyph is None else glyph.copy())
+        return GlyfTable(glyphs)
+
     def calculate_bounds_box(self) -> tuple[int, int, int, int]:
         x_min = None
         y_min = None
@@ -98,12 +104,6 @@ class GlyfTable(SfntTable):
             y_max = 0
 
         return x_min, y_min, x_max, y_max
-
-    def copy(self) -> GlyfTable:
-        glyphs = []
-        for glyph in self.glyphs:
-            glyphs.append(None if glyph is None else glyph.copy())
-        return GlyfTable(glyphs)
 
     def dump_with_loca_table(self, configs: SfntConfigs) -> tuple[bytes, LocaTable]:
         stream = Stream()

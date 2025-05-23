@@ -140,8 +140,7 @@ class VheaTable(SfntTable):
     def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         stream = Stream()
 
-        stream.write_uint16(self.major_version)
-        stream.write_uint16(self.minor_version)
+        stream.write_version_16dot16((self.major_version, self.minor_version))
         stream.write_fword(self.ascender)
         stream.write_fword(self.descender)
         stream.write_fword(self.line_gap)

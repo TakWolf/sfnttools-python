@@ -55,10 +55,6 @@ class DsigTable(SfntTable):
                 self.flags == other.flags and
                 self.signature_blocks == other.signature_blocks)
 
-    @property
-    def num_signatures(self) -> int:
-        return len(self.signature_blocks)
-
     def copy(self) -> DsigTable:
         signature_blocks = [signature_block.copy() for signature_block in self.signature_blocks]
         return DsigTable(
@@ -70,7 +66,7 @@ class DsigTable(SfntTable):
     def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         stream = Stream()
 
-        stream.seek(4 + 2 + 2 + (4 + 4 + 4) * self.num_signatures)
+        stream.seek(4 + 2 + 2 + (4 + 4 + 4) * len(self.signature_blocks))
         signature_records = []
         for signature_block in self.signature_blocks:
             offset = stream.tell()
@@ -83,7 +79,7 @@ class DsigTable(SfntTable):
 
         stream.seek(0)
         stream.write_uint32(self.version)
-        stream.write_uint16(self.num_signatures)
+        stream.write_uint16(len(self.signature_blocks))
         stream.write_uint16(self.flags.value)
         for signature_record in signature_records:
             signature_record.dump(stream)

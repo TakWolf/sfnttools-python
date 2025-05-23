@@ -129,7 +129,7 @@ class SfntFontCollection(UserList[SfntFont]):
     def parse(
             stream: bytes | bytearray | BinaryIO,
             configs: SfntConfigs | None = None,
-            share_tables: bool = True,
+            share_tables: bool = False,
             verify_checksum: bool = False,
     ) -> SfntFontCollection:
         if isinstance(stream, (bytes, bytearray)):
@@ -164,7 +164,7 @@ class SfntFontCollection(UserList[SfntFont]):
     def load(
             file_path: str | PathLike[str],
             configs: SfntConfigs | None = None,
-            share_tables: bool = True,
+            share_tables: bool = False,
             verify_checksum: bool = False,
     ) -> SfntFontCollection:
         with open(file_path, 'rb') as file:
