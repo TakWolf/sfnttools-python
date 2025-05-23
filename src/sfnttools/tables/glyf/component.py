@@ -4,7 +4,6 @@ from typing import Any
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
-from sfnttools.tables.glyf.simple import SimpleGlyph
 from sfnttools.utils.stream import Stream
 
 _COMPONENT_GLYPH_FLAGS_MASK_ARG_1_AND_2_ARE_WORDS = 0b_0000_0000_0000_0001
@@ -392,28 +391,6 @@ class ComponentGlyph:
     @property
     def num_components(self) -> int:
         return len(self.components)
-
-    def calculate_maxp_values(
-            self,
-            glyphs: list[SimpleGlyph | ComponentGlyph | None],
-            max_depth: int = 1,
-    ) -> tuple[int, int, int]:
-        init_depth = max_depth
-        num_points = 0
-        num_contours = 0
-        for component in self.components:
-            base_glyph = glyphs[component.glyph_index]
-            if isinstance(base_glyph, SimpleGlyph):
-                base_num_points = base_glyph.num_points
-                base_num_contours = base_glyph.num_contours
-            elif isinstance(base_glyph, ComponentGlyph):
-                base_num_points, base_num_contours, base_max_depth = base_glyph.calculate_maxp_values(glyphs, init_depth + 1)
-                max_depth = max(max_depth, base_max_depth)
-            else:
-                continue
-            num_points += base_num_points
-            num_contours += base_num_contours
-        return num_points, num_contours, max_depth
 
     def copy(self) -> ComponentGlyph:
         components = [component.copy() for component in self.components]

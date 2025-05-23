@@ -5,9 +5,36 @@ from typing import Any
 from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
+from sfnttools.tables.cff2.table import Cff2Table
+from sfnttools.tables.cff_.table import CffTable
 from sfnttools.tables.glyf.component import ComponentGlyph
 from sfnttools.tables.glyf.simple import SimpleGlyph
+from sfnttools.tables.glyf.table import GlyfTable
 from sfnttools.utils.stream import Stream
+
+
+def calculate_maxp_values(
+        self,
+        glyphs: list[SimpleGlyph | ComponentGlyph | None],
+        max_depth: int = 1,
+) -> tuple[int, int, int]:
+    init_depth = max_depth
+    num_points = 0
+    num_contours = 0
+    for component in self.components:
+        base_glyph = glyphs[component.glyph_index]
+        if isinstance(base_glyph, SimpleGlyph):
+            base_num_points = base_glyph.num_points
+            base_num_contours = base_glyph.num_contours
+        elif isinstance(base_glyph, ComponentGlyph):
+            base_num_points, base_num_contours, base_max_depth = base_glyph.calculate_maxp_values(glyphs,
+                                                                                                  init_depth + 1)
+            max_depth = max(max_depth, base_max_depth)
+        else:
+            continue
+        num_points += base_num_points
+        num_contours += base_num_contours
+    return num_points, num_contours, max_depth
 
 
 class MaxpTable(SfntTable):
@@ -189,12 +216,9 @@ class MaxpTable(SfntTable):
         )
 
     def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
-        from sfnttools.tables.cff_.table import CffTable
-        cff_table: CffTable | None = dependencies.get('CFF ', None)
-        from sfnttools.tables.cff2.table import Cff2Table
-        cff2_table: Cff2Table | None = dependencies.get('CFF2', None)
-        from sfnttools.tables.glyf.table import GlyfTable
-        glyf_table: GlyfTable | None = dependencies.get('glyf', None)
+        cff_table: CffTable | None = tables.get('CFF ', None)
+        cff2_table: Cff2Table | None = tables.get('CFF2', None)
+        glyf_table: GlyfTable | None = tables.get('glyf', None)
 
         if cff_table is not None:
             self.major_version = 0

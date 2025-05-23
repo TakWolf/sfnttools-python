@@ -10,6 +10,7 @@ from sfnttools.tables.hhea.table import HheaTable
 from sfnttools.tables.hmtx.table import HmtxTable
 from sfnttools.tables.loca.table import LocaTable
 from sfnttools.tables.maxp.table import MaxpTable
+from sfnttools.tables.vhea.table import VheaTable
 from sfnttools.tables.vmtx.table import VmtxTable
 
 TABLE_TYPE_REGISTRY: Final = {
@@ -22,6 +23,7 @@ TABLE_TYPE_REGISTRY: Final = {
     'hmtx': HmtxTable,
     'loca': LocaTable,
     'maxp': MaxpTable,
+    'vhea': VheaTable,
     'vmtx': VmtxTable,
 }
 

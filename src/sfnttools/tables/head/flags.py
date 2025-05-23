@@ -5,7 +5,7 @@ from typing import Any
 from sfnttools.flags import SfntFlags
 
 _HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 = 0b_0000_0000_0000_0001
-_HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 = 0b_0000_0000_0000_0010
+_HEAD_TABLE_FLAGS_MASK_LEFT_SIDE_BEARING_AT_X0 = 0b_0000_0000_0000_0010
 _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE = 0b_0000_0000_0000_0100
 _HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER = 0b_0000_0000_0000_1000
 _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH = 0b_0000_0000_0001_0000
@@ -27,7 +27,7 @@ class HeadTableFlags(SfntFlags):
     @staticmethod
     def parse(value: int) -> HeadTableFlags:
         baseline_at_y0 = value & _HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0 > 0
-        left_sidebearing_at_x0 = value & _HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0 > 0
+        left_side_bearing_at_x0 = value & _HEAD_TABLE_FLAGS_MASK_LEFT_SIDE_BEARING_AT_X0 > 0
         instructions_may_depend_on_point_size = value & _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE > 0
         force_ppem_to_integer = value & _HEAD_TABLE_FLAGS_MASK_FORCE_PPEM_TO_INTEGER > 0
         instructions_may_alter_advance_width = value & _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_ALTER_ADVANCE_WIDTH > 0
@@ -37,7 +37,7 @@ class HeadTableFlags(SfntFlags):
         last_resort_font = value & _HEAD_TABLE_FLAGS_MASK_LAST_RESORT_FONT > 0
         return HeadTableFlags(
             baseline_at_y0,
-            left_sidebearing_at_x0,
+            left_side_bearing_at_x0,
             instructions_may_depend_on_point_size,
             force_ppem_to_integer,
             instructions_may_alter_advance_width,
@@ -48,7 +48,7 @@ class HeadTableFlags(SfntFlags):
         )
 
     baseline_at_y0: bool
-    left_sidebearing_at_x0: bool
+    left_side_bearing_at_x0: bool
     instructions_may_depend_on_point_size: bool
     force_ppem_to_integer: bool
     instructions_may_alter_advance_width: bool
@@ -59,8 +59,8 @@ class HeadTableFlags(SfntFlags):
 
     def __init__(
             self,
-            baseline_at_y0: bool = False,
-            left_sidebearing_at_x0: bool = False,
+            baseline_at_y0: bool = True,
+            left_side_bearing_at_x0: bool = True,
             instructions_may_depend_on_point_size: bool = False,
             force_ppem_to_integer: bool = False,
             instructions_may_alter_advance_width: bool = False,
@@ -70,7 +70,7 @@ class HeadTableFlags(SfntFlags):
             last_resort_font: bool = False,
     ):
         self.baseline_at_y0 = baseline_at_y0
-        self.left_sidebearing_at_x0 = left_sidebearing_at_x0
+        self.left_side_bearing_at_x0 = left_side_bearing_at_x0
         self.instructions_may_depend_on_point_size = instructions_may_depend_on_point_size
         self.force_ppem_to_integer = force_ppem_to_integer
         self.instructions_may_alter_advance_width = instructions_may_alter_advance_width
@@ -83,7 +83,7 @@ class HeadTableFlags(SfntFlags):
         if not isinstance(other, HeadTableFlags):
             return False
         return (self.baseline_at_y0 == other.baseline_at_y0 and
-                self.left_sidebearing_at_x0 == other.left_sidebearing_at_x0 and
+                self.left_side_bearing_at_x0 == other.left_side_bearing_at_x0 and
                 self.instructions_may_depend_on_point_size == other.instructions_may_depend_on_point_size and
                 self.force_ppem_to_integer == other.force_ppem_to_integer and
                 self.instructions_may_alter_advance_width == other.instructions_may_alter_advance_width and
@@ -97,8 +97,8 @@ class HeadTableFlags(SfntFlags):
         value = 0
         if self.baseline_at_y0:
             value |= _HEAD_TABLE_FLAGS_MASK_BASELINE_AT_Y0
-        if self.left_sidebearing_at_x0:
-            value |= _HEAD_TABLE_FLAGS_MASK_LEFT_SIDEBEARING_AT_X0
+        if self.left_side_bearing_at_x0:
+            value |= _HEAD_TABLE_FLAGS_MASK_LEFT_SIDE_BEARING_AT_X0
         if self.instructions_may_depend_on_point_size:
             value |= _HEAD_TABLE_FLAGS_MASK_INSTRUCTIONS_MAY_DEPEND_ON_POINT_SIZE
         if self.force_ppem_to_integer:
@@ -118,7 +118,7 @@ class HeadTableFlags(SfntFlags):
     def copy(self) -> HeadTableFlags:
         return HeadTableFlags(
             self.baseline_at_y0,
-            self.left_sidebearing_at_x0,
+            self.left_side_bearing_at_x0,
             self.instructions_may_depend_on_point_size,
             self.force_ppem_to_integer,
             self.instructions_may_alter_advance_width,

@@ -6,6 +6,9 @@ from typing import Any, Final
 from sfnttools.configs import SfntConfigs
 from sfnttools.error import SfntError
 from sfnttools.table import SfntTable
+from sfnttools.tables.cff2.table import Cff2Table
+from sfnttools.tables.cff_.table import CffTable
+from sfnttools.tables.glyf.table import GlyfTable
 from sfnttools.tables.head.enum import FontDirectionHint, IndexToLocFormat, GlyphDataFormat
 from sfnttools.tables.head.flags import HeadTableFlags, MacStyle
 from sfnttools.utils.stream import Stream
@@ -18,8 +21,6 @@ UNITS_PER_EM_MAX_VALUE: Final = 2 ** 14
 
 
 class HeadTable(SfntTable):
-    update_dependencies = ['CFF ', 'CFF2', 'glyf', 'loca']
-
     @staticmethod
     def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> HeadTable:
         stream = Stream(data)
@@ -90,7 +91,7 @@ class HeadTable(SfntTable):
             font_revision: float = 0,
             checksum_adjustment: int = 0,
             flags: HeadTableFlags | None = None,
-            units_per_em: int = 1024,
+            units_per_em: int = 1000,
             created_seconds_since_1904: int = 0,
             modified_seconds_since_1904: int = 0,
             x_min: int = 0,
@@ -98,7 +99,7 @@ class HeadTable(SfntTable):
             x_max: int = 0,
             y_max: int = 0,
             mac_style: MacStyle | None = None,
-            lowest_rec_ppem: int = 0,
+            lowest_rec_ppem: int = 3,
             font_direction_hint: FontDirectionHint = FontDirectionHint.LEFT_TO_RIGHT_CONTAINS_NEUTRALS,
             index_to_loc_format: IndexToLocFormat = IndexToLocFormat.SHORT,
             glyph_data_format: GlyphDataFormat = GlyphDataFormat.CURRENT,
@@ -196,26 +197,20 @@ class HeadTable(SfntTable):
         )
 
     def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
-        from sfnttools.tables.cff_.table import CffTable
-        cff_table: CffTable | None = dependencies.get('CFF ', None)
-        from sfnttools.tables.cff2.table import Cff2Table
-        cff2_table: Cff2Table | None = dependencies.get('CFF2', None)
-        from sfnttools.tables.glyf.table import GlyfTable
-        glyf_table: GlyfTable | None = dependencies.get('glyf', None)
+        cff2_table: Cff2Table | None = tables.get('CFF2', None)
+        cff_table: CffTable | None = tables.get('CFF ', None)
+        glyf_table: GlyfTable | None = tables.get('glyf', None)
 
-        if cff_table is not None:
-            self.x_min, self.y_min, self.x_max, self.y_max = cff_table.calculate_bounds_box()
-        elif cff2_table is not None:
+        if cff2_table is not None:
             self.x_min, self.y_min, self.x_max, self.y_max = cff2_table.calculate_bounds_box()
+        elif cff_table is not None:
+            self.x_min, self.y_min, self.x_max, self.y_max = cff_table.calculate_bounds_box()
         elif glyf_table is not None:
             self.x_min, self.y_min, self.x_max, self.y_max = glyf_table.calculate_bounds_box()
 
-            from sfnttools.tables.loca.table import LocaTable
-            loca_table: LocaTable = dependencies['loca']
+            # TODO
 
-            self.index_to_loc_format = loca_table.calculate_index_to_loc_format()
-
-    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         stream = Stream()
 
         stream.write_uint16(self.major_version)
@@ -237,4 +232,4 @@ class HeadTable(SfntTable):
         stream.write_int16(self.index_to_loc_format)
         stream.write_int16(self.glyph_data_format)
 
-        return stream.get_value(), {}
+        return stream.get_value()

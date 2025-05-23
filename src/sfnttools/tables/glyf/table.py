@@ -13,11 +13,10 @@ from sfnttools.utils.stream import Stream
 
 class GlyfTable(SfntTable):
     parse_dependencies = ['loca']
-    dump_generates = ['loca']
 
     @staticmethod
     def parse(data: bytes, configs: SfntConfigs, tables: dict[str, SfntTable]) -> GlyfTable:
-        loca_table: LocaTable = dependencies['loca']
+        loca_table: LocaTable = tables['loca']
 
         glyphs = []
         for i in range(len(loca_table.offsets) - 1):
@@ -122,6 +121,5 @@ class GlyfTable(SfntTable):
 
         return stream.get_value(), LocaTable(offsets)
 
-    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> tuple[bytes, dict[str, SfntTable]]:
-        data, loca_table = self.dump_with_loca_table(configs)
-        return data, {'loca': loca_table}
+    def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
+        return self.dump_with_loca_table(configs)[0]
