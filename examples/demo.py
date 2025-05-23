@@ -4,7 +4,7 @@ from sfnttools.font import SfntFont, SfntFontCollection
 
 def main():
     r1 = SfntFont.load(assets_dir.joinpath('retro-pixel', 'retro-pixel-cute-mono.ttf'), verify_checksum=True)
-    r2 = SfntFont.load(assets_dir.joinpath('retro-pixel', 'retro-pixel-cute-mono.woff2'), verify_checksum=True)
+    r2 = SfntFont.load(assets_dir.joinpath('retro-pixel', 'retro-pixel-cute-mono.ttf.woff2'), verify_checksum=True)
 
     u1 = SfntFont.load(assets_dir.joinpath('unifont', 'unifont-16.0.03.otf'), verify_checksum=True)
     u2 = SfntFont.load(assets_dir.joinpath('unifont', 'unifont-16.0.03.otf.woff2'), verify_checksum=True)
