@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.table import SfntTable
 from sfnttools.tables.hhea.enum import MetricDataFormat
 from sfnttools.utils.stream import Stream
+
+if TYPE_CHECKING:
+    from sfnttools.tables.hmtx.table import HmtxTable
 
 
 class HheaTable(SfntTable):
@@ -133,10 +136,11 @@ class HheaTable(SfntTable):
         )
 
     def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
+        hmtx_table: HmtxTable = tables['hmtx']
+
+        self.advance_width_max = max(metric.advance_width for metric in hmtx_table.hori_metrics)
 
         # TODO
-
-        pass
 
     def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         stream = Stream()

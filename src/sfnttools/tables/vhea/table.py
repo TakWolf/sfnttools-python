@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from sfnttools.configs import SfntConfigs
 from sfnttools.table import SfntTable
 from sfnttools.tables.hhea.enum import MetricDataFormat
 from sfnttools.utils.stream import Stream
+
+if TYPE_CHECKING:
+    from sfnttools.tables.vmtx.table import VmtxTable
 
 
 class VheaTable(SfntTable):
@@ -132,10 +135,11 @@ class VheaTable(SfntTable):
         )
 
     def update(self, configs: SfntConfigs, tables: dict[str, SfntTable]):
+        vmtx_table: VmtxTable = tables['vmtx']
+
+        self.advance_height_max = max(metric.advance_height for metric in vmtx_table.vert_metrics)
 
         # TODO
-
-        pass
 
     def dump(self, configs: SfntConfigs, tables: dict[str, SfntTable]) -> bytes:
         stream = Stream()
