@@ -20,7 +20,7 @@ class DsigPermissionFlags(SfntFlags):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, DsigPermissionFlags):
-            return False
+            return NotImplemented
         return self.cannot_be_resigned == other.cannot_be_resigned
 
     @property

@@ -28,7 +28,7 @@ class LongVertMetric:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, LongVertMetric):
-            return False
+            return NotImplemented
         return (self.advance_height == other.advance_height and
                 self.top_side_bearing == other.top_side_bearing)
 

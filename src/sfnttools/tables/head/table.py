@@ -126,7 +126,7 @@ class HeadTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, HeadTable):
-            return False
+            return NotImplemented
         return (self.major_version == other.major_version and
                 self.minor_version == other.minor_version and
                 self.font_revision == other.font_revision and

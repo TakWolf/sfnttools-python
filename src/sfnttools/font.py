@@ -110,7 +110,7 @@ class SfntFont(UserDict[str, SfntTable]):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, SfntFont):
-            return False
+            return NotImplemented
         return (self.sfnt_version == other.sfnt_version and
                 self.woff_payload == other.woff_payload and
                 super().__eq__(other))
@@ -188,7 +188,7 @@ class SfntFontCollection(UserList[SfntFont]):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, SfntFontCollection):
-            return False
+            return NotImplemented
         return (self.ttc_payload == other.ttc_payload and
                 self.woff_payload == other.woff_payload and
                 super().__eq__(other))

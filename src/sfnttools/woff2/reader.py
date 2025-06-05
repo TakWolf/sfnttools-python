@@ -7,10 +7,13 @@ from sfnttools.error import SfntError
 from sfnttools.payload import TtcPayload, WoffPayload
 from sfnttools.reader import SfntReader, SfntCollectionReader
 from sfnttools.table import SfntTable
+from sfnttools.tables.hhea.table import HheaTable
+from sfnttools.tables.maxp.table import MaxpTable
 from sfnttools.tag import SfntVersion
 from sfnttools.utils.stream import Stream
 from sfnttools.woff2.glyf import TransformedGlyfTable
 from sfnttools.woff2.headers import Woff2TableDirectoryEntry, Woff2CollectionFontEntry, Woff2Header
+from sfnttools.woff2.hmtx import TransformedHmtxTable
 from sfnttools.xtf.headers import TableRecord, TableDirectory
 
 
@@ -136,9 +139,31 @@ class Woff2Reader(SfntReader):
             self.collection_tables_cache[('glyf', glyf_directory_entry.offset)] = glyf_table, 0
             self.collection_tables_cache[('loca', loca_directory_entry.offset)] = loca_table, 0
 
+    def _reconstruct_hmtx_table(self):
+        hmtx_directory_entry = self.table_directory_entries_map['hmtx']
+
+        if not hmtx_directory_entry.transformed:
+            return
+
+        if 'hmtx' in self.tables_cache:
+            return
+        if self.collection_tables_cache is not None:
+            if ('hmtx', hmtx_directory_entry.offset) in self.collection_tables_cache:
+                return
+
+        maxp_table: MaxpTable = self.get_or_parse_table('maxp')
+        hhea_table: HheaTable = self.get_or_parse_table('hhea')
+        transformed_hmtx_table = TransformedHmtxTable.parse(hmtx_directory_entry.read_table_data(self.uncompressed_stream), maxp_table, hhea_table)
+        hmtx_table = transformed_hmtx_table.reconstruct()
+        self.tables_cache['hmtx'] = hmtx_table, 0
+        if self.collection_tables_cache is not None:
+            self.collection_tables_cache[('hmtx', hmtx_directory_entry.offset)] = hmtx_table, 0
+
     def get_or_parse_table(self, tag: str) -> SfntTable:
         if tag in ('glyf', 'loca'):
             self._reconstruct_glyf_and_loca_tables()
+        elif tag == 'hmtx':
+            self._reconstruct_hmtx_table()
         return super().get_or_parse_table(tag)
 
 

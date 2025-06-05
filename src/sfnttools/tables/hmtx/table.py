@@ -47,7 +47,7 @@ class HmtxTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, HmtxTable):
-            return False
+            return NotImplemented
         return self.hori_metrics == other.hori_metrics
 
     def copy(self) -> HmtxTable:

@@ -46,7 +46,7 @@ class SignatureBlockFormat1(SignatureBlock):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, SignatureBlockFormat1):
-            return False
+            return NotImplemented
         return self.signature == other.signature
 
     @property

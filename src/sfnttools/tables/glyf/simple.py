@@ -64,7 +64,7 @@ class SimpleGlyphFlags(SfntFlags):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, SimpleGlyphFlags):
-            return False
+            return NotImplemented
         return (self.on_curve_point == other.on_curve_point and
                 self.x_short_vector == other.x_short_vector and
                 self.y_short_vector == other.y_short_vector and
@@ -141,7 +141,7 @@ class GlyphPoint:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, GlyphPoint):
-            return False
+            return NotImplemented
         return (self.delta_x == other.delta_x and
                 self.delta_y == other.delta_y and
                 self.on_curve_point == other.on_curve_point)
@@ -263,7 +263,7 @@ class SimpleGlyph:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, SimpleGlyph):
-            return False
+            return NotImplemented
         return (self.x_min == other.x_min and
                 self.y_min == other.y_min and
                 self.x_max == other.x_max and

@@ -18,7 +18,7 @@ class DefaultTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, DefaultTable):
-            return False
+            return NotImplemented
         return self.data == other.data
 
     def copy(self) -> DefaultTable:

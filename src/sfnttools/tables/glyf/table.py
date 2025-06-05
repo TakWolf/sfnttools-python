@@ -51,7 +51,7 @@ class GlyfTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, GlyfTable):
-            return False
+            return NotImplemented
         return self.glyphs == other.glyphs
 
     @property

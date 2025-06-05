@@ -81,7 +81,7 @@ class HeadTableFlags(SfntFlags):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, HeadTableFlags):
-            return False
+            return NotImplemented
         return (self.baseline_at_y0 == other.baseline_at_y0 and
                 self.left_side_bearing_at_x0 == other.left_side_bearing_at_x0 and
                 self.instructions_may_depend_on_point_size == other.instructions_may_depend_on_point_size and
@@ -177,7 +177,7 @@ class MacStyle(SfntFlags):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, MacStyle):
-            return False
+            return NotImplemented
         return (self.bold == other.bold and
                 self.italic == other.italic and
                 self.underline == other.underline and

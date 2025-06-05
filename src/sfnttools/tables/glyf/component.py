@@ -94,7 +94,7 @@ class ComponentGlyphFlags(SfntFlags):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ComponentGlyphFlags):
-            return False
+            return NotImplemented
         return (self.arg_1_and_2_are_words == other.arg_1_and_2_are_words and
                 self.args_are_xy_values == other.args_are_xy_values and
                 self.round_xy_to_grid == other.round_xy_to_grid and
@@ -186,7 +186,7 @@ class XyGlyphComponent:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, XyGlyphComponent):
-            return False
+            return NotImplemented
         return (self.glyph_index == other.glyph_index and
                 self.x == other.x and
                 self.y == other.y and
@@ -232,7 +232,7 @@ class PointsGlyphComponent:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, PointsGlyphComponent):
-            return False
+            return NotImplemented
         return (self.glyph_index == other.glyph_index and
                 self.parent_point == other.parent_point and
                 self.child_point == other.child_point and
@@ -380,7 +380,7 @@ class ComponentGlyph:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ComponentGlyph):
-            return False
+            return NotImplemented
         return (self.x_min == other.x_min and
                 self.y_min == other.y_min and
                 self.x_max == other.x_max and

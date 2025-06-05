@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 from sfnttools.error import SfntError
 from sfnttools.flags import SfntFlags
@@ -26,6 +27,11 @@ class OptionFlags(SfntFlags):
 
     def __init__(self, has_overlap_simple_bitmap: bool = False):
         self.has_overlap_simple_bitmap = has_overlap_simple_bitmap
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, OptionFlags):
+            return NotImplemented
+        return self.has_overlap_simple_bitmap == other.has_overlap_simple_bitmap
 
     @property
     def value(self) -> int:

@@ -50,7 +50,7 @@ class DsigTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, DsigTable):
-            return False
+            return NotImplemented
         return (self.version == other.version and
                 self.flags == other.flags and
                 self.signature_blocks == other.signature_blocks)

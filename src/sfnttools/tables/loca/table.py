@@ -38,7 +38,7 @@ class LocaTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, LocaTable):
-            return False
+            return NotImplemented
         return self.offsets == other.offsets
 
     def copy(self) -> LocaTable:

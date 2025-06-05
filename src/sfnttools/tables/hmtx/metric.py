@@ -28,7 +28,7 @@ class LongHoriMetric:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, LongHoriMetric):
-            return False
+            return NotImplemented
         return (self.advance_width == other.advance_width and
                 self.left_side_bearing == other.left_side_bearing)
 

@@ -47,7 +47,7 @@ class VmtxTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, VmtxTable):
-            return False
+            return NotImplemented
         return self.vert_metrics == other.vert_metrics
 
     def copy(self) -> SfntTable:

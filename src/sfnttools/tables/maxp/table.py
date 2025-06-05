@@ -153,7 +153,7 @@ class MaxpTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, MaxpTable):
-            return False
+            return NotImplemented
         return (self.major_version == other.major_version and
                 self.minor_version == other. minor_version and
                 self.num_glyphs == other. num_glyphs and

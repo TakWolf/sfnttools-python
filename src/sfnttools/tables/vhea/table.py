@@ -100,7 +100,7 @@ class VheaTable(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, VheaTable):
-            return False
+            return NotImplemented
         return (self.major_version == other.major_version and
                 self.minor_version == other.minor_version and
                 self.ascender == other.ascender and

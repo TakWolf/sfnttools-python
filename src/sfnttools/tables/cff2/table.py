@@ -19,7 +19,7 @@ class Cff2Table(SfntTable):
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Cff2Table):
-            return False
+            return NotImplemented
         return self.data == other.data
 
     @property
